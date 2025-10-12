@@ -1,0 +1,14 @@
+/* reset básico */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* opcional: garantir cor padrão */
+body {
+  background-color: #212121;
+  color: #fff;
+  font-family: sans-serif;
+}
