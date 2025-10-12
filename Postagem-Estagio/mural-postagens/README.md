@@ -1,5 +1,52 @@
-# Vue 3 + Vite
+# Aplicativo de Postagem
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Na 1ª Sprint do meu Estagio, eu fiquei encarregado de fazer o MVP Basico (Autenticação + Postagens com Prazo).
+- Criar conta do administrador.
+- Login e autenticação do administrador.
+- Usuário visitante acessa mural sem login.
+- Gerenciar Permissões (somente admin posta).
+- Criar postagens com título, descrição e mídia.
+- Defenir prazo de validade (data/hora).
+- Remover/ocultar postagens automaticamente após expirar.
+- Visualizar postagens em mural dinâmico.
+- Exibir postagens em formato de cards.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+E para realizar esse projeto eu utilizei o [VSCode](https://code.visualstudio.com/) e utilizei a Linguagem [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+
+## Iniciando o Projeto
+
+```sh
+npm install
+```
+
+### Entre nas cordenadas do arquivo certo
+
+```sh
+cd .\Postagem-Estagio\mural-postagens\ 
+```
+
+### Compilar e recarregar rapidamente para desenvolvimento
+
+```sh
+npm run dev
+```
+
+Ao realizar essas etapas você iria ver o jeito que realizei o projeto.
+
+## Observação:
+Caso na hora de Cadastrar o administrador não estiver funcionando, quer dizer que o administrador que eu cadastrei esta registrado, se for assim, use estas informações para realizar o login:
+
+## Usuario
+
+```sh
+Carlos Henrique
+```
+
+### Senha
+
+```sh
+chbc1004
+```
+
+Se não tiver problema, ignore esta Observação.
+
