@@ -11,7 +11,7 @@ Na 1ª Sprint do meu Estagio, eu fiquei encarregado de fazer o MVP Basico (Auten
 - Visualizar postagens em mural dinâmico.
 - Exibir postagens em formato de cards.
 
-E para realizar esse projeto eu utilizei o [VSCode](https://code.visualstudio.com/) e utilizei a Linguagem [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+E para realizar esse projeto eu utilizei o [VSCode](https://code.visualstudio.com/) e usei a Linguagem [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
 
 ## Iniciando o Projeto
 
