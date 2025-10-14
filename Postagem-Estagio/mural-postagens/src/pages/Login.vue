@@ -32,11 +32,11 @@
           </label>
         </div> -->
 
-        <div class="link-cadastro">
+        <!-- <div class="link-cadastro">
           <label for="text" class="font">
             <RouterLink to="/create-admin" class="cadastro-link">Criar uma conta</RouterLink>
           </label>
-        </div>
+        </div> -->
 
         <button type="submit" class="btn-login">Entrar</button>
       </form>
@@ -167,3 +167,4 @@ input:focus {
   font-weight: bold;
 }
 </style>
+
