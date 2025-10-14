@@ -13,6 +13,10 @@ Na 1ª Sprint do meu Estagio, eu fiquei encarregado de fazer o MVP Basico (Auten
 
 E para realizar esse projeto eu utilizei o [VSCode](https://code.visualstudio.com/) e usei a Linguagem [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
 
+## Rota para criar o Administrador
+
+[Criar Admin](https://estagio-livid.vercel.app/#/create-admin)
+
 ## Iniciando o Projeto
 
 ```sh
