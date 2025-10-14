@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import CreateAdmin from '../pages/CreateAdmin.vue';
 import Login from '../pages/Login.vue';
 import CreatePost from '../pages/CreatePost.vue';
@@ -18,7 +18,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 });
 
@@ -38,3 +38,4 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
+
