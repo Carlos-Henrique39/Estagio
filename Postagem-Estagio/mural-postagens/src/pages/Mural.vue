@@ -40,13 +40,11 @@
             <p class="descricao">{{ post.description }}</p>
             <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
             <p class="expira-em">Expira em: {{ formatDate(post.expiresAt) }}</p>
+            <div v-if="isAdmin" class="post-actions">
+              <button @click="editPost(post.id)" class="btn-edit">Editar</button>
+              <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
+            </div>
           </div>
-
-          <div v-if="isAdmin" class="post-actions">
-            <button @click="editPost(post.id)" class="btn-edit">Editar</button>
-            <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
-          </div>
-
         </div>
 
         <button
@@ -121,7 +119,7 @@ export default {
       const hora = date.getHours().toString().padStart(2, "0");
 
       return `${data} às ${hora}h`;
-    }
+    },
     editPost(id) {
       const posts = JSON.parse(localStorage.getItem("posts")) || [];
       const post = posts.find((p) => p.id === id);
@@ -149,7 +147,7 @@ export default {
 .post-actions {
   margin-top: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .btn-edit, .btn-delete {
