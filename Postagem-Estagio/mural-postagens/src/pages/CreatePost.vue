@@ -66,7 +66,22 @@ export default {
       image: null,
       expiresAt: "",
       expiresTime: "",
+      isEditing: false,
+      editId: null,
     };
+  },
+  created() {
+    const postToEdit = JSON.parse(localStorage.getItem("editPost"));
+    if (postToEdit) {
+      this.title = postToEdit.title;
+      this.description = postToEdit.description;
+      this.image = postToEdit.image;
+      const date = new Date(postToEdit.expiresAt);
+      this.expiresAt = date.toISOString().slice(0, 10);
+      this.expiresTime = date.toTimeString().slice(0, 5);
+      this.isEditing = true;
+      this.editId = postToEdit.id;
+    }
   },
   methods: {
     handleImage(event) {
@@ -92,19 +107,31 @@ export default {
 
       const expirationDate = new Date(year, month - 1, day, hour, minute);
 
-      const newPost = {
-        id: Date.now(),
-        title: this.title,
-        description: this.description,
-        image: this.image,
-        expiresAt: expirationDate.getTime(),
-      };
-
-      posts.push(newPost);
+      if (this.isEditing) {
+        const index = posts.findIndex((p) => p.id === this.editId);
+        if (index !== -1) {
+          posts[index] = {
+            ...posts[index],
+            title: this.title,
+            description: this.description,
+            image: this.image,
+            expiresAt: expirationDate.getTime(),
+          }
+        }
+        localStorage.removeItem("editPost");
+        alert("Postagem atualizada com sucesso!")
+      } else {
+        const newPost = {
+          id: Date.now(),
+          title: this.title,
+          description: this.description,
+          image: this.image,
+          expiresAt: expirationDate.getTime(),
+        };
+        posts.push(newPost);
+        alert("✅ Postagem salva com sucesso!");
+      }
       localStorage.setItem("posts", JSON.stringify(posts));
-
-      alert("✅ Postagem salva com sucesso!");
-
       this.$router.push("/mural");
     },
   },

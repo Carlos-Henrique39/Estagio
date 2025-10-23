@@ -41,6 +41,12 @@
             <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
             <p class="expira-em">Expira em: {{ formatDate(post.expiresAt) }}</p>
           </div>
+
+          <div v-if="isAdmin" class="post-actions">
+            <button @click="editPost(post.id)" class="btn-edit">Editar</button>
+            <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
+          </div>
+
         </div>
 
         <button
@@ -116,11 +122,56 @@ export default {
 
       return `${data} às ${hora}h`;
     }
+    editPost(id) {
+      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const post = posts.find((p) => p.id === id);
+      if (post) {
+        localStorage.setItem("editPost", JSON.stringify(post));
+        this.$router.push("/create-post"); // Reaproveita a tela existente
+      }
+    },
+    deletePost(id) {
+      if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
+      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const updated = posts.filter((p) => p.id !== id);
+      localStorage.setItem("posts", JSON.stringify(updated));
+      this.posts = updated;
+      alert("Postagem excluída com sucesso!");
+    },
+
+
   },
 };
 </script>
 
 <style scoped>
+
+.post-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-edit, .btn-delete {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-edit {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-edit:hover { background-color: #2980b9; }
+.btn-delete:hover { background-color: #c0392b; }
 
 .welcome-msg{
   text-align: center;
