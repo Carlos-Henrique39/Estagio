@@ -58,23 +58,25 @@ export default {
   },
   methods: {
     login() {
-      const adminData = JSON.parse(localStorage.getItem("admin"));
+      const admins = JSON.parse(localStorage.getItem("admins")) || [];
 
-      if (!adminData) {
-        this.errorMessage = "Nenhum administrador cadastrado!";
+      if (admins.length === 0){
+        this.errorMessage = " Nenhum administrador cadastrado!";
         return;
       }
 
-      if (
-        this.username === adminData.username &&
-        this.password === adminData.password
-      ) {
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("loggedUser", this.username);
+      const validAdmin = admins.find(
+        (admin) =>
+          admin.username === this.username && admin.password === this.password
+      );
 
+      if (validAdmin) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("loggedUser", validAdmin.username);
+        this.errorMessage = "";
         this.$router.push("/mural");
       } else {
-        this.errorMessage = "Usuário ou senha incorretos!";
+        this.errorMessage = "Usuario ou senha incorretos!";
       }
     },
   },

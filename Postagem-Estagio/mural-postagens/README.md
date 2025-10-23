@@ -52,5 +52,10 @@ Carlos Henrique
 chbc1004
 ```
 
-Se não tiver problema, ignore esta Observação.
+## Rota de Cadastro:
+A rota de Cadastro esta bloqueada, então para compensar e ajudar aqueles que querem criar um Administrador, siga para essa rota
+
+```sh
+https://estagio-livid.vercel.app/#/create-admin
+```
 

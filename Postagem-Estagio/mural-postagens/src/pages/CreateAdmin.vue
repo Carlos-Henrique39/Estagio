@@ -48,29 +48,30 @@ export default {
   },
   methods: {
     createAdmin() {
-      // Verificar se já existe um admin cadastrado
-      const existingAdmin = localStorage.getItem("admin");
-
-      if (existingAdmin) {
-        this.message = "Já existe uma conta de administrador cadastrada!";
+      if (!this.username || !this.password) {
+        alert("Preencha todos os campos!");
         return;
       }
 
-      // Criar objeto do admin
-      const adminData = {
+      const admins = JSON.parse(localStorage.getItem("admins")) || [];
+
+      const existing = admins.find(admin => admin.username === this.username);
+      if (existing) {
+        alert("Este nome de usuário já está sendo usado!");
+        return;
+      }
+
+      admins.push({
         username: this.username,
         password: this.password,
-      };
+      });
 
-      // Salvar no localStorage
-      localStorage.setItem("admin", JSON.stringify(adminData));
+      localStorage.setItem("admins", JSON.stringify(admins));
 
-      this.message = "Conta do administrador foi criado com sucesso!";
+      alert("✅ Administrador criado com sucesso!");
+      this.$router.push("/login");
+    }
 
-      // Limpar campos
-      this.username = "";
-      this.password = "";
-    },
   },
 };
 </script>
@@ -120,7 +121,7 @@ button:hover {
 
 .success-message {
   margin-top: 15px;
-  color: green;
+  color: white;
   text-align: center;
   font-weight: bold;
 }
