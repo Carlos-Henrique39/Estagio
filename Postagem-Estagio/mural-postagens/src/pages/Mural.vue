@@ -6,15 +6,12 @@
       <button v-else @click="logout" class="btn-logout">Sair</button>
     </div>
 
-    <!-- <transition name="fade">
-      <p v-if="showWelcome" class="welcome-msg">Bem-vindo, administrador!</p>
-    </transition> -->
-
     <div class="mural-container">
       <h1>Vagas</h1>
 
       <div class="actions" v-if="isAdmin">
         <router-link to="/create-post" class="btn-create">+ Nova Postagem</router-link>
+        <router-link to="/archived-posts" class="btn-archive">📁 Ver Arquivadas</router-link>
       </div>
 
       <p v-if="posts.length === 0" class="sem-posts">
@@ -40,6 +37,7 @@
             <p class="descricao">{{ post.description }}</p>
             <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
             <p class="expira-em">Expira em: {{ formatDate(post.expiresAt) }}</p>
+
             <div v-if="isAdmin" class="post-actions">
               <button @click="editPost(post.id)" class="btn-edit">Editar</button>
               <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
@@ -68,6 +66,8 @@ export default {
       isAdmin: false,
       currentIndex: 0,
       showWelcome: false,
+      activePosts: [],
+      expiredPosts: [],
     };
   },
   computed: {
@@ -76,27 +76,48 @@ export default {
     },
   },
   created() {
-    const savedPosts = JSON.parse(localStorage.getItem("posts")) || [];
-    const now = Date.now();
-    const validPosts = savedPosts.filter((post) => post.expiresAt > now);
-    localStorage.setItem("posts", JSON.stringify(validPosts));
-    this.posts = validPosts;
-
     this.isAdmin = localStorage.getItem("isLoggedIn") === "true";
-
     if (this.isAdmin) {
       this.showWelcome = true;
-      setTimeout(() => {
-        this.showWelcome = false;
-      }, 4000);
+      setTimeout(() => (this.showWelcome = false), 4000);
     }
+
+    this.organizarPostagens();
   },
+
   methods: {
+    organizarPostagens() {
+      const todosPosts = JSON.parse(localStorage.getItem("posts")) || [];
+      const postsAtivas = [];
+      const postsArquivadas = [];
+
+      const agora = new Date();
+
+      todosPosts.forEach((post) => {
+        const dataExpiracao = new Date(post.expiresAt);
+        if (dataExpiracao >= agora) {
+          postsAtivas.push(post);
+        } else {
+          postsArquivadas.push(post);
+        }
+      });
+
+      // Salva cada grupo separadamente
+      localStorage.setItem("postsAtivas", JSON.stringify(postsAtivas));
+      localStorage.setItem("postsArquivadas", JSON.stringify(postsArquivadas));
+
+      // Atualiza o mural
+      this.posts = postsAtivas;
+      this.activePosts = postsAtivas;
+      this.expiredPosts = postsArquivadas;
+    },
+    
     logout() {
       localStorage.removeItem("isLoggedIn");
       this.isAdmin = false;
       window.location.reload();
     },
+
     nextGroup() {
       if (this.currentIndex + 3 < this.posts.length) {
         this.currentIndex += 3;
@@ -107,42 +128,52 @@ export default {
         this.currentIndex -= 3;
       }
     },
-    formatDate(timestamp) {
-      const date = new Date(timestamp);
-      
-      const data = date.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-
-      const hora = date.getHours().toString().padStart(2, "0");
-
-      return `${data} às ${hora}h`;
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     },
     editPost(id) {
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || [];
       const post = posts.find((p) => p.id === id);
       if (post) {
         localStorage.setItem("editPost", JSON.stringify(post));
-        this.$router.push("/create-post"); // Reaproveita a tela existente
+        this.$router.push("/create-post");
       }
     },
     deletePost(id) {
       if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
-      const updated = posts.filter((p) => p.id !== id);
-      localStorage.setItem("posts", JSON.stringify(updated));
-      this.posts = updated;
+      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || [];
+      const atualizadas = posts.filter((p) => p.id !== id);
+      localStorage.setItem("postsAtivas", JSON.stringify(atualizadas));
+      this.posts = atualizadas;
       alert("Postagem excluída com sucesso!");
     },
-
-
-  },
+  }
 };
 </script>
 
 <style scoped>
+
+.btn-archive {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: background 0.3s;
+}
+
+.btn-archive:hover {
+  background-color: #2980b9;
+}
+
+
+.archived-section h2 {
+  color: #888;
+}
 
 .post-actions {
   margin-top: 10px;

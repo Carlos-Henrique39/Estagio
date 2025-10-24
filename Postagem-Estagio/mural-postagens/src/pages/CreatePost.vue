@@ -1,6 +1,6 @@
 <template>
   <div class="background">
-    <h1>Criar Postagem</h1>
+    <h1>{{ isEditing ? "Editar Postagem" : "Criar Postagem" }}</h1>
     <form @submit.prevent="addPost">
       <div class="form-group">
         <label for="title">Título:</label>
@@ -30,29 +30,21 @@
 
       <div class="form-group">
         <label for="expiresAt">Data de Expiração:</label>
-        <input
-          type="date"
-          id="expiresAt"
-          v-model="expiresAt"
-          required
-        />
+        <input type="date" id="expiresAt" v-model="expiresAt" required />
       </div>
+
       <div class="form-group">
         <label for="expiresTime">Hora de Expiração:</label>
-        <input
-          type="time"
-          id="expiresTime"
-          v-model="expiresTime"
-          required
-        />
+        <input type="time" id="expiresTime" v-model="expiresTime" required />
       </div>
 
-      <button type="submit">Salvar Postagem</button>
+      <button type="submit">{{ isEditing ? "Salvar Alterações" : "Salvar Postagem" }}</button>
     </form>
 
-      <label for="text" class="font">Criou a postagem?
-        <RouterLink to="/mural">Mural</RouterLink>
-      </label>
+    <label for="text" class="font">
+      Criou a postagem?
+      <RouterLink to="/mural">Mural</RouterLink>
+    </label>
   </div>
 </template>
 
@@ -70,6 +62,7 @@ export default {
       editId: null,
     };
   },
+
   created() {
     const postToEdit = JSON.parse(localStorage.getItem("editPost"));
     if (postToEdit) {
@@ -83,17 +76,19 @@ export default {
       this.editId = postToEdit.id;
     }
   },
+
   methods: {
     handleImage(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          this.image = reader.result;
+          this.image = reader.result
         };
         reader.readAsDataURL(file);
       }
     },
+
     addPost() {
       if (!this.title || !this.description || !this.expiresAt || !this.expiresTime) {
         alert("Por favor, preencha todos os campos obrigatórios.");
@@ -101,10 +96,10 @@ export default {
       }
 
       const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const archived = JSON.parse(localStorage.getItem("postsArquivadas")) || [];
 
       const [year, month, day] = this.expiresAt.split("-").map(Number);
       const [hour, minute] = this.expiresTime.split(":").map(Number);
-
       const expirationDate = new Date(year, month - 1, day, hour, minute);
 
       if (this.isEditing) {
@@ -116,10 +111,10 @@ export default {
             description: this.description,
             image: this.image,
             expiresAt: expirationDate.getTime(),
-          }
+          };
         }
         localStorage.removeItem("editPost");
-        alert("Postagem atualizada com sucesso!")
+        alert("Postagem atualizada com sucesso!");
       } else {
         const newPost = {
           id: Date.now(),
@@ -127,11 +122,25 @@ export default {
           description: this.description,
           image: this.image,
           expiresAt: expirationDate.getTime(),
+          fixed: false, 
         };
         posts.push(newPost);
         alert("✅ Postagem salva com sucesso!");
       }
-      localStorage.setItem("posts", JSON.stringify(posts));
+
+      const now = Date.now();
+      const stillActive = [];
+      posts.forEach((post) => {
+        if (post.expiresAt < now) {
+          archived.push(post);
+        } else {
+          stillActive.push(post);
+        }
+      });
+
+      localStorage.setItem("posts", JSON.stringify(stillActive));
+      localStorage.setItem("postsArquivadas", JSON.stringify(archived));
+
       this.$router.push("/mural");
     },
   },

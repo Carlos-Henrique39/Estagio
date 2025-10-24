@@ -3,6 +3,7 @@ import CreateAdmin from '../pages/CreateAdmin.vue';
 import Login from '../pages/Login.vue';
 import CreatePost from '../pages/CreatePost.vue';
 import Mural from '../pages/Mural.vue';
+import Arquivos from '../pages/Arquivos.vue';
 
 const routes = [
   { path: '/', redirect: '/mural' },
@@ -13,6 +14,10 @@ const routes = [
     path: '/create-post',
     component: CreatePost,
     meta: { requiresAuth: true } 
+  },
+  { path: '/archived-posts',
+    component: Arquivos,
+    meta: { requiresAuth: true }
   },
   { path: '/:catchAll(.*)', redirect: '/mural' } 
 ];
