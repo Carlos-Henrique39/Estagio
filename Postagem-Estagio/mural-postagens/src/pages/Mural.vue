@@ -66,8 +66,8 @@ export default {
       isAdmin: false,
       currentIndex: 0,
       showWelcome: false,
-      activePosts: [],
-      expiredPosts: [],
+      postsAtivas: [],
+      postsArquivadas: [],
     };
   },
   computed: {
@@ -87,31 +87,33 @@ export default {
 
   methods: {
     organizarPostagens() {
-      const todosPosts = JSON.parse(localStorage.getItem("posts")) || [];
-      const postsAtivas = [];
-      const postsArquivadas = [];
-
+      // Carrega as postagens atuais (ativas ou antigas)
+      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || JSON.parse(localStorage.getItem("posts")) || [];
       const agora = new Date();
 
-      todosPosts.forEach((post) => {
+      const postsAtivas = [];
+      const postsArquivadas = JSON.parse(localStorage.getItem("postsArquivadas")) || [];
+
+      posts.forEach((post) => {
         const dataExpiracao = new Date(post.expiresAt);
         if (dataExpiracao >= agora) {
           postsAtivas.push(post);
         } else {
-          postsArquivadas.push(post);
+          // Evita duplicar no arquivo
+          if (!postsArquivadas.find(p => p.id === post.id)) {
+            postsArquivadas.push(post);
+          }
         }
       });
 
-      // Salva cada grupo separadamente
+      // Atualiza o LocalStorage corretamente
       localStorage.setItem("postsAtivas", JSON.stringify(postsAtivas));
       localStorage.setItem("postsArquivadas", JSON.stringify(postsArquivadas));
 
-      // Atualiza o mural
+      // Atualiza a tela
       this.posts = postsAtivas;
-      this.activePosts = postsAtivas;
-      this.expiredPosts = postsArquivadas;
     },
-    
+        
     logout() {
       localStorage.removeItem("isLoggedIn");
       this.isAdmin = false;

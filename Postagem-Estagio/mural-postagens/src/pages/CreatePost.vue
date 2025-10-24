@@ -95,7 +95,7 @@ export default {
         return;
       }
 
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const activePosts = JSON.parse(localStorage.getItem("postsAtivas")) || [];
       const archived = JSON.parse(localStorage.getItem("postsArquivadas")) || [];
 
       const [year, month, day] = this.expiresAt.split("-").map(Number);
@@ -103,10 +103,10 @@ export default {
       const expirationDate = new Date(year, month - 1, day, hour, minute);
 
       if (this.isEditing) {
-        const index = posts.findIndex((p) => p.id === this.editId);
+        const index = activePosts.findIndex((p) => p.id === this.editId);
         if (index !== -1) {
-          posts[index] = {
-            ...posts[index],
+          activePosts[index] = {
+            ...activePosts[index],
             title: this.title,
             description: this.description,
             image: this.image,
@@ -122,27 +122,23 @@ export default {
           description: this.description,
           image: this.image,
           expiresAt: expirationDate.getTime(),
-          fixed: false, 
+          fixed: false,
         };
-        posts.push(newPost);
+
+        if (expirationDate.getTime() < Date.now()) {
+          archived.push(newPost);
+        } else {
+          activePosts.push(newPost);
+        }
+
         alert("✅ Postagem salva com sucesso!");
       }
 
-      const now = Date.now();
-      const stillActive = [];
-      posts.forEach((post) => {
-        if (post.expiresAt < now) {
-          archived.push(post);
-        } else {
-          stillActive.push(post);
-        }
-      });
-
-      localStorage.setItem("posts", JSON.stringify(stillActive));
+      localStorage.setItem("postsAtivas", JSON.stringify(activePosts));
       localStorage.setItem("postsArquivadas", JSON.stringify(archived));
 
       this.$router.push("/mural");
-    },
+    }
   },
 };
 </script>
