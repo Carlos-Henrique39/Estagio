@@ -28,7 +28,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
 router.put('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { title, description, expires_at } = req.body;
+  const { title, description, image, expires_at } = req.body;
 
   try {
     const result = await db.query(
@@ -90,6 +90,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/expired', authenticateToken, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT * FROM posts 
+       WHERE expires_at <= NOW() 
+       ORDER BY expires_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar postagens expiradas' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -106,19 +120,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/expired', authenticateToken, async (req, res) => {
-  try {
-    const result = await db.query(
-      `SELECT * FROM posts 
-       WHERE is_active = false 
-       OR (expires_at IS NOT NULL AND expires_at < NOW())
-       ORDER BY expires_at DESC`
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar postagens expiradas' });
-  }
-});
+
 
 module.exports = router;

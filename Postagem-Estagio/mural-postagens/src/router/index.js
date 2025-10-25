@@ -32,7 +32,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !isLoggedIn) {
     alert("Apenas administradores podem criar postagens!");
-    return next("/login");
+    return next("/mural");
   }
 
   if (isLoggedIn && (to.path === "/login" || to.path === "/create-admin")) {

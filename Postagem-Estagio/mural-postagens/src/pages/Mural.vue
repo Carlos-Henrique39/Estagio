@@ -116,7 +116,7 @@ export default {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("token");
       this.isAdmin = false;
-      this.$router.push("/login");
+      this.$router.push("/mural");
     },
 
     nextGroup() {
