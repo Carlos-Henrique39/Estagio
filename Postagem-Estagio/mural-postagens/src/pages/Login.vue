@@ -57,31 +57,41 @@ export default {
     };
   },
   methods: {
-    login() {
-      const admins = JSON.parse(localStorage.getItem("admins")) || [];
+    async login() {
+      try {
+        const response = await fetch("http://localhost:4000/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password,
+          }),
+        });
 
-      if (admins.length === 0){
-        this.errorMessage = " Nenhum administrador cadastrado!";
-        return;
-      }
+        const data = await response.json();
 
-      const validAdmin = admins.find(
-        (admin) =>
-          admin.username === this.username && admin.password === this.password
-      );
+        if (!response.ok) {
+          throw new Error(data.error || "Falha no login");
+        }
 
-      if (validAdmin) {
+        localStorage.setItem("token", data.token);
         localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("loggedUser", validAdmin.username);
+        localStorage.setItem("loggedUser", data.admin.username);
+
         this.errorMessage = "";
+        alert("Login realizado com sucesso!");
         this.$router.push("/mural");
-      } else {
-        this.errorMessage = "Usuario ou senha incorretos!";
+      } catch (error) {
+        console.error("Erro no login:", error);
+        this.errorMessage = "Usuário ou senha incorretos.";
       }
     },
   },
 };
 </script>
+
 
 <style scoped>
 .background {

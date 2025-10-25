@@ -1,6 +1,5 @@
 <template>
   <div class="background">
-    
     <div class="direita">
       <router-link v-if="!isAdmin" to="/login" class="btn-login">Login</router-link>
       <button v-else @click="logout" class="btn-logout">Sair</button>
@@ -19,24 +18,20 @@
       </p>
 
       <div v-else class="carousel">
-        <button
-          class="arrow left"
-          @click="prevGroup"
-          :disabled="currentIndex === 0"
-        >
+        <button class="arrow left" @click="prevGroup" :disabled="currentIndex === 0">
           ◀
         </button>
 
         <div class="post-list">
           <div
             v-for="(post, index) in visiblePosts"
-            :key="index"
+            :key="post.id"
             class="post-card"
           >
             <h2>{{ post.title }}</h2>
             <p class="descricao">{{ post.description }}</p>
             <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
-            <p class="expira-em">Expira em: {{ formatDate(post.expiresAt) }}</p>
+            <p class="expira-em">Expira em: {{ formatDate(post.expires_at) }}</p>
 
             <div v-if="isAdmin" class="post-actions">
               <button @click="editPost(post.id)" class="btn-edit">Editar</button>
@@ -65,9 +60,6 @@ export default {
       posts: [],
       isAdmin: false,
       currentIndex: 0,
-      showWelcome: false,
-      postsAtivas: [],
-      postsArquivadas: [],
     };
   },
   computed: {
@@ -75,49 +67,56 @@ export default {
       return this.posts.slice(this.currentIndex, this.currentIndex + 3);
     },
   },
-  created() {
+  async created() {
     this.isAdmin = localStorage.getItem("isLoggedIn") === "true";
-    if (this.isAdmin) {
-      this.showWelcome = true;
-      setTimeout(() => (this.showWelcome = false), 4000);
-    }
-
-    this.organizarPostagens();
+    await this.loadPosts(); // 🔹 Busca os posts do backend
   },
-
   methods: {
-    organizarPostagens() {
-      // Carrega as postagens atuais (ativas ou antigas)
-      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || JSON.parse(localStorage.getItem("posts")) || [];
-      const agora = new Date();
-
-      const postsAtivas = [];
-      const postsArquivadas = JSON.parse(localStorage.getItem("postsArquivadas")) || [];
-
-      posts.forEach((post) => {
-        const dataExpiracao = new Date(post.expiresAt);
-        if (dataExpiracao >= agora) {
-          postsAtivas.push(post);
-        } else {
-          // Evita duplicar no arquivo
-          if (!postsArquivadas.find(p => p.id === post.id)) {
-            postsArquivadas.push(post);
-          }
-        }
-      });
-
-      // Atualiza o LocalStorage corretamente
-      localStorage.setItem("postsAtivas", JSON.stringify(postsAtivas));
-      localStorage.setItem("postsArquivadas", JSON.stringify(postsArquivadas));
-
-      // Atualiza a tela
-      this.posts = postsAtivas;
+    async loadPosts() {
+      try {
+        const response = await fetch("http://localhost:4000/posts");
+        if (!response.ok) throw new Error("Erro ao carregar postagens");
+        const data = await response.json();
+        const now = new Date();
+        this.posts = data
+          .filter(post => new Date(post.expires_at) > now)
+          .map(post => ({
+          ...post,
+          expires_at: new Date(post.expires_at)
+        }));
+      } catch (err) {
+        console.error("Erro ao carregar postagens:", err);
+      }
     },
-        
+
+    async deletePost(id) {
+      if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:4000/posts/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error("Erro ao excluir postagem");
+        alert("Postagem excluída com sucesso!");
+        await this.loadPosts(); // Atualiza a lista
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao excluir postagem");
+      }
+    },
+
+    editPost(id) {
+      this.$router.push(`/create-post?id=${id}`);
+    },
+
     logout() {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
       this.isAdmin = false;
-      window.location.reload();
+      this.$router.push("/login");
     },
 
     nextGroup() {
@@ -131,28 +130,17 @@ export default {
       }
     },
     formatDate(dateString) {
+      if (!dateString) return "Sem data de expiração";
       const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      if (isNaN(date)) return "Data Inválida";
+      const data = date.toLocaleDateString('pt-BR');
+      const hora = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      return `${data} às ${hora}`;
     },
-    editPost(id) {
-      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || [];
-      const post = posts.find((p) => p.id === id);
-      if (post) {
-        localStorage.setItem("editPost", JSON.stringify(post));
-        this.$router.push("/create-post");
-      }
-    },
-    deletePost(id) {
-      if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
-      const posts = JSON.parse(localStorage.getItem("postsAtivas")) || [];
-      const atualizadas = posts.filter((p) => p.id !== id);
-      localStorage.setItem("postsAtivas", JSON.stringify(atualizadas));
-      this.posts = atualizadas;
-      alert("Postagem excluída com sucesso!");
-    },
-  }
+  },
 };
 </script>
+
 
 <style scoped>
 

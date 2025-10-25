@@ -12,7 +12,7 @@
         <div v-for="post in expiredPosts" :key="post.id" class="card">
           <h2>{{ post.title }}</h2>
           <p>{{ post.description }}</p>
-          <p class="expiracao">Expirou em: {{ formatDate(post.expiresAt) }}</p>
+          <p class="expiracao">Expirou em: {{ formatDate(post.expires_at) }}</p>
         </div>
       </div>
 
@@ -29,16 +29,28 @@ export default {
       expiredPosts: [],
     };
   },
-  mounted() {
-    this.expiredPosts = JSON.parse(localStorage.getItem("postsArquivadas")) || [];
+  async mounted() {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:4000/expired", {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Erro ao buscar postagens arquivadas");
+      this.expiredPosts = await response.json();
+    } catch (err) {
+      console.error(err);
+    }
   },
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const data = date.toLocaleDateString("pt-BR");
+      const hora = date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      return `${data} às ${hora}`;
     },
     logout() {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
       this.$router.push("/login");
     },
   },
