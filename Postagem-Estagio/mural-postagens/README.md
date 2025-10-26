@@ -56,6 +56,6 @@ Carlos
 A rota de Cadastro esta bloqueada, então para compensar e ajudar aqueles que querem criar um Administrador, siga para essa rota
 
 ```sh
-https://estagio-livid.vercel.app/#/create-admin
+[Criar Administrador](https://estagio-livid.vercel.app/#/create-admin)
 ```
 
