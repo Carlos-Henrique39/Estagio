@@ -43,13 +43,13 @@ Caso na hora de Cadastrar o administrador não estiver funcionando, quer dizer q
 ## Usuario
 
 ```sh
-Carlos Henrique
+Carlos
 ```
 
 ### Senha
 
 ```sh
-chbc1004
+1004
 ```
 
 ## Rota de Cadastro:
