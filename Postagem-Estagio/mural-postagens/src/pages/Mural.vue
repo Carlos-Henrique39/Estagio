@@ -74,7 +74,7 @@ export default {
   methods: {
     async loadPosts() {
       try {
-        const response = await fetch("http://localhost:4000/posts");
+        const response = await fetch("https://estagio-ob9v.onrender.com/posts");
         if (!response.ok) throw new Error("Erro ao carregar postagens");
         const data = await response.json();
         const now = new Date();
@@ -93,7 +93,7 @@ export default {
       if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:4000/posts/${id}`, {
+        const response = await fetch(`https://estagio-ob9v.onrender.com/posts/${id}`, {
           method: "DELETE",
           headers: {
             "Authorization": `Bearer ${token}`,
