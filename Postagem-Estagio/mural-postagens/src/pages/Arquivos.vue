@@ -82,11 +82,13 @@ export default {
 }
 
 .btn-logout {
+  display: inline-block;
+  padding: 10px 15px;
   background-color: #e74c3c;
   color: white;
-  padding: 10px 15px;
   border-radius: 6px;
-  text-decoration: none;
+  border: none;
+  cursor: pointer;
   font-weight: bold;
   transition: background 0.3s;
 }
