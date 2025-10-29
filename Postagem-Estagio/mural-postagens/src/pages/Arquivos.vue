@@ -71,20 +71,24 @@ export default {
   align-items: center;
 }
 
-.btn-logout {
-  display: inline-block;
-  padding: 10px 15px;
-  background-color: #e74c3c;
+.btn-voltar {
+  background-color: #42b983;
   color: white;
+  padding: 10px 15px;
   border-radius: 6px;
-  border: none;
-  cursor: pointer;
+  text-decoration: none;
   font-weight: bold;
   transition: background 0.3s;
 }
 
-.btn-logout:hover {
-  background-color: #c0392b;
+.btn-logout {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
 }
 
 .btn-voltar:hover {
