@@ -32,7 +32,7 @@ export default {
   async mounted() {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://estagio-ob9v.onrender.com/posts/expired", {
+      const response = await fetch("https://localhost:4000/expired", {
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Erro ao buscar postagens arquivadas");

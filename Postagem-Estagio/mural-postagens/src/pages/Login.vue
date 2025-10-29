@@ -59,7 +59,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await fetch("https://estagio-ob9v.onrender.com/auth/login", {
+        const response = await fetch("https://localhost:4000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
