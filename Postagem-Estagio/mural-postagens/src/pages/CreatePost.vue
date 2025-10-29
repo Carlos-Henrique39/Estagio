@@ -86,7 +86,7 @@ export default {
   methods: {
     async loadPost(id) {
       try {
-        const response = await fetch(`https://localhost:4000/posts/${id}`);
+        const response = await fetch(`http://localhost:4000/posts/${id}`);
         if (!response.ok) throw new Error("Erro ao carregar postagem.");
         const post = await response.json();
 
@@ -141,8 +141,8 @@ export default {
 
       try {
         const url = this.isEditing
-          ? `https://localhost:4000/posts/${this.editId}`
-          : "https://localhost:4000/posts";
+          ? `http://localhost:4000/posts/${this.editId}`
+          : "http://localhost:4000/posts";
 
         const method = this.isEditing ? "PUT" : "POST";
 
