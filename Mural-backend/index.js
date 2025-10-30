@@ -14,4 +14,4 @@ app.use('/posts', postsRoutes);
 
 const PORT = process.env.PORT || 4000;
 
-module.exports = app;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
