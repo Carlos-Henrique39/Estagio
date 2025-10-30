@@ -86,7 +86,7 @@ export default {
   methods: {
     async loadPost(id) {
       try {
-        const response = await fetch(`http://localhost:4000/posts/${id}`);
+        const response = await fetch(`http://estagio-mymb.vercel.app/posts/${id}`);
         if (!response.ok) throw new Error("Erro ao carregar postagem.");
         const post = await response.json();
 
@@ -141,8 +141,8 @@ export default {
 
       try {
         const url = this.isEditing
-          ? `http://localhost:4000/posts/${this.editId}`
-          : "http://localhost:4000/posts";
+          ? `http://estagio-mymb.vercel.app/posts/${this.editId}`
+          : "http://estagio-mymb.vercel.app/posts";
 
         const method = this.isEditing ? "PUT" : "POST";
 
