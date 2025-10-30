@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE TABLE IF NOT EXISTS posts (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
+  description TEXT NOT NULL,
   author_id INTEGER NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   expires_at TIMESTAMP WITH TIME ZONE,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS expired_posts (
   id SERIAL PRIMARY KEY,
   original_post_id INTEGER,
   title VARCHAR(255),
-  content TEXT,
+  description TEXT,
   author_id INTEGER,
   expired_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
