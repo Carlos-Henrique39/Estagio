@@ -93,7 +93,7 @@ export default {
       if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://estagio-mymb.vercel.app/posts/${id}`, {
+        const response = await fetch(`http://localhost:4000/posts/${id}`, {
           method: "DELETE",
           headers: {
             "Authorization": `Bearer ${token}`,

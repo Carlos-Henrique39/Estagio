@@ -141,8 +141,8 @@ export default {
 
       try {
         const url = this.isEditing
-          ? `http://estagio-mymb.vercel.app/posts/${this.editId}`
-          : "http://estagio-mymb.vercel.app/posts";
+          ? `http://localhost:4000/posts/${this.editId}`
+          : "http://localhost:4000/posts";
 
         const method = this.isEditing ? "PUT" : "POST";
 
