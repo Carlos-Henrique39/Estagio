@@ -74,7 +74,7 @@ export default {
   methods: {
     async loadPosts() {
       try {
-        const response = await fetch("http://estagio-mymb.vercel.app/posts");
+        const response = await fetch("http://localhost:4000/posts");
         if (!response.ok) throw new Error("Erro ao carregar postagens");
         const data = await response.json();
         const now = new Date();
