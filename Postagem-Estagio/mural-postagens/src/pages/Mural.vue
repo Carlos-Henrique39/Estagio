@@ -6,12 +6,14 @@
     </div>
 
     <div class="mural-container">
-      <h1>Vagas</h1>
 
       <div class="actions" v-if="isAdmin">
         <router-link to="/create-post" class="btn-create">+ Nova Postagem</router-link>
         <router-link to="/archived-posts" class="btn-archive">📁 Ver Arquivadas</router-link>
       </div>
+
+      <h1>Vagas</h1>
+
 
       <p v-if="posts.length === 0" class="sem-posts">
         Nenhuma postagem disponível no momento.
