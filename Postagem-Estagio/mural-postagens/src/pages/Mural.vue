@@ -20,7 +20,7 @@
 
       <div class="actions" v-if="isAdmin">
         <router-link to="/create-post" class="btn-create"> Nova Postagem</router-link>
-        <router-link to="/archived-posts" class="btn-archive"> Ver Arquivadas</router-link>
+        <router-link to="/archived-posts" class="btn-archive"> Histórico de Postagens </router-link>
       </div>
 
       <h1>Vagas</h1>
@@ -227,10 +227,11 @@ export default {
       }
     },
 
-      async markAsRead(notificationId) {
+    async markAsRead(notificationId) {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
+
         const res = await fetch(`http://localhost:4000/notifications/${notificationId}/read`, {
           method: "PATCH",
           headers: {
@@ -238,12 +239,14 @@ export default {
             "Authorization": `Bearer ${token}`
           }
         });
+
         if (!res.ok) throw new Error("Erro ao marcar como lida");
-        // atualizar localmente
-        const idx = this.notifications.findIndex(n => n.id === notificationId);
-        if (idx !== -1) this.$set(this.notifications, idx, { ...this.notifications[idx], read: true });
+
+        this.notifications = this.notifications.filter(n => n.id !== notificationId);
+
+
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao marcar como lida:", err);
       }
     },
   }

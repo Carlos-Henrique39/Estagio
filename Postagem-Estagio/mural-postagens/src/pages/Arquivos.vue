@@ -6,7 +6,7 @@
     </div>
 
     <div class="container">
-      <h1>📁 Postagens Arquivadas</h1>
+      <h1>📁 Histórico de Postagens</h1>
 
       <div v-if="expiredPosts.length" class="cards">
         <div v-for="post in expiredPosts" :key="post.id" class="card">
