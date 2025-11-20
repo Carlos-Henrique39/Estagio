@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-function authenticateToken(req, res, next) {
+function authenticate(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Token faltando' });
@@ -12,4 +12,12 @@ function authenticateToken(req, res, next) {
   });
 }
 
-module.exports = authenticateToken;
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acesso permitido apenas para administradores' });
+  }
+  next();
+}
+
+module.exports = { authenticate, requireAdmin };
+

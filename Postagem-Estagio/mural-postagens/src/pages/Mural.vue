@@ -2,18 +2,28 @@
   <div class="background">
     <div class="direita">
       <router-link v-if="!isAdmin" to="/login" class="btn-login">Login</router-link>
-      <button v-else @click="logout" class="btn-logout">Sair</button>
+
+      <button
+        v-if="isAdmin"
+        class="btn-notifications"
+        @click="togglePopup"
+        aria-haspopup="dialog"
+        :aria-expanded="showPopup.toString()"
+      >🔔
+        <span v-if="unreadCount > 0" class="notif-badge">{{ unreadCount }}</span>
+    </button>
+
+      <button v-if="isAdmin" @click="logout" class="btn-logout">Sair</button>
     </div>
 
     <div class="mural-container">
 
       <div class="actions" v-if="isAdmin">
-        <router-link to="/create-post" class="btn-create">+ Nova Postagem</router-link>
-        <router-link to="/archived-posts" class="btn-archive">📁 Ver Arquivadas</router-link>
+        <router-link to="/create-post" class="btn-create"> Nova Postagem</router-link>
+        <router-link to="/archived-posts" class="btn-archive"> Ver Arquivadas</router-link>
       </div>
 
       <h1>Vagas</h1>
-
 
       <p v-if="posts.length === 0" class="sem-posts">
         Nenhuma postagem disponível no momento.
@@ -51,6 +61,31 @@
         </button>
       </div>
     </div>
+
+    <!-- OVERLAY + POPUP de notificações (aparece apenas se isAdmin && showPopup) -->
+    <div v-if="isAdmin && showPopup" class="overlay" @click.self="closePopup">
+      <div class="popup" role="dialog" aria-label="Notificações">
+        <div class="popup-header">
+          <h3>Notificações</h3>
+          <button class="close-btn" @click="closePopup" aria-label="Fechar">✕</button>
+        </div>
+
+        <div class="popup-content">
+          <ul v-if="notifications.length > 0" class="notif-list">
+            <li v-for="(n, i) in notifications" :key="i" class="notif-item" @click="markAsRead(n.id)">
+              <strong>{{ n.title }}</strong>
+              <p class="notif-text">{{ n.message }}</p>
+              <small class="notif-date">{{ formatDate(n.created_at) }}</small>
+            </li>
+          </ul>
+
+          <div v-else class="no-notif">
+            <p>Nenhuma notificação ainda.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -62,16 +97,24 @@ export default {
       posts: [],
       isAdmin: false,
       currentIndex: 0,
+      showPopup: false,
+      notifications: [],
     };
   },
   computed: {
     visiblePosts() {
       return this.posts.slice(this.currentIndex, this.currentIndex + 3);
     },
+    unreadCount() {
+      return this.notifications.filter(n => !n.read).length;
+    }
   },
   async created() {
     this.isAdmin = localStorage.getItem("isLoggedIn") === "true";
-    await this.loadPosts(); // 🔹 Busca os posts do backend
+    await this.loadPosts();
+    if (this.isAdmin) {
+      this.loadNotifications();
+    }
   },
   methods: {
     async loadPosts() {
@@ -83,9 +126,9 @@ export default {
         this.posts = data
           .filter(post => new Date(post.expires_at) > now)
           .map(post => ({
-          ...post,
-          expires_at: new Date(post.expires_at)
-        }));
+            ...post,
+            expires_at: new Date(post.expires_at)
+          }));
       } catch (err) {
         console.error("Erro ao carregar postagens:", err);
       }
@@ -139,13 +182,169 @@ export default {
       const hora = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       return `${data} às ${hora}`;
     },
-  },
-};
+
+    togglePopup() {
+      this.showPopup = !this.showPopup;
+      if (this.showPopup) {
+        this.loadNotifications();
+      }
+    },
+    closePopup() {
+      this.showPopup = false;
+    },
+
+    async loadNotifications() {
+      try {
+        // Exemplo: buscar em /notifications (apenas quando disponível no backend)
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn("Token não encontrado - usuario pode não estar autenticado");
+          this.notifications = [];
+          return;
+        }
+        const res = await fetch('http://localhost:4000/notifications', {
+          method: "GET",
+          headers: { 
+            "Content-type": "application/json",          
+            Authorization: `Bearer ${token}` 
+          }
+        });
+
+        if (res.status === 401) {
+          console.warn("Não autorizado ao buscar notificações");
+          this.notifications = [];
+          return;
+        }
+
+        if (!res.ok) throw new Error('Erro ao carregar notificações');
+
+        const data = await res.json();
+
+        this.notifications = data.map(n => ({ ...n, created_at: n.created_at ? new Date(n.created_at) : null}));
+      } catch (err) {
+        console.error("Erro ao carregar notificações:", err);
+        this.notifications = [];
+      }
+    },
+
+      async markAsRead(notificationId) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch(`http://localhost:4000/notifications/${notificationId}/read`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error("Erro ao marcar como lida");
+        // atualizar localmente
+        const idx = this.notifications.findIndex(n => n.id === notificationId);
+        if (idx !== -1) this.$set(this.notifications, idx, { ...this.notifications[idx], read: true });
+      } catch (err) {
+        console.error(err);
+      }
+    },
+  }
+}
 </script>
 
-
 <style scoped>
+.btn-notifications {
+  display: inline-block;
+  padding: 8px 12px;
+  margin-right: 10px;
+  background-color: #9e8e6c;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-notifications:hover { 
+  background-color: #6d624b;
+ }
 
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: flex-end; /* popup à direita */
+  align-items: flex-start;
+  padding: 70px 30px 0 0; /* posiciona abaixo da área superior */
+  z-index: 9999;
+}
+
+.popup {
+  width: 320px;
+  max-height: 70vh;
+  background: #1f1f1f;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  padding: 12px 14px;
+  overflow: auto;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 8px;
+}
+
+.close-btn {
+  border: none;
+  background: transparent;
+  color: #ddd;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.popup-content {
+  margin-top: 8px;
+}
+
+.notif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notif-item {
+  background: rgba(255,255,255,0.02);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.notif-item strong { 
+  display: block; 
+  margin-bottom: 4px; 
+  color: white; 
+}
+.notif-text { 
+  margin: 0 0 6px 0; 
+  color: #ddd; 
+  font-size: 0.95rem; 
+}
+.notif-date { 
+  color: #aaa; 
+  font-size: 0.75rem; 
+}
+
+.no-notif {
+  padding: 14px;
+  text-align: center;
+  color: #ddd;
+}
+
+/* --- Restante do seu CSS mantido --- */
 .btn-archive {
   display: inline-block;
   padding: 10px 15px;
@@ -352,6 +551,19 @@ export default {
 .fade-enter, 
 .fade-leave-to{
   opacity: 0;
+}
+
+.notif-badge{
+  display:inline-block;
+  min-width:20px;
+  padding:2px 6px;
+  font-size:12px;
+  font-weight:700;
+  background:#e74c3c;
+  color:#fff;
+  border-radius:12px;
+  margin-left:8px;
+  vertical-align:middle;
 }
 
 </style>

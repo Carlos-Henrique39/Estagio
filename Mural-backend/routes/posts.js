@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const authenticateToken = require('../middleware/auth');
+const { authenticate, requireAdmin }= require('../middleware/auth');
 
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const { title, description, image, expires_at } = req.body;
     const author_id = req.user.id;
@@ -26,7 +26,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { title, description, image, expires_at } = req.body;
 
@@ -51,7 +51,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -90,7 +90,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/expired', authenticateToken, async (req, res) => {
+router.get('/expired', authenticate, requireAdmin, async (req, res) => {
   try {
     const result = await db.query(
       `SELECT * FROM posts 

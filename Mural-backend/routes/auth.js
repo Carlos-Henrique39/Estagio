@@ -43,8 +43,14 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, admin.password_hash);
     if (!match) return res.status(401).json({ error: 'Credenciais inválidas' });
 
-    const payload = { id: admin.id, username: admin.username };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
+    const payload = { 
+      id: admin.id, 
+      username: admin.username, 
+      role: "admin"    
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { 
+      expiresIn: process.env.JWT_EXPIRES_IN || '1d' 
+    });
 
     res.json({ token, admin: { id: admin.id, username: admin.username} });
   } catch (err) {

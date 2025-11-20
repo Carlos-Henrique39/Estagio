@@ -1,5 +1,6 @@
 <template>
   <div class="background">
+    <router-link to="/mural" class="btn-create"> Voltar </router-link>
     <h1>{{ isEditing ? "Editar Postagem" : "Criar Postagem" }}</h1>
 
     <form @submit.prevent="addPost">
@@ -50,11 +51,6 @@
         {{ isEditing ? "Salvar Alterações" : "Salvar Postagem" }}
       </button>
     </form>
-
-    <label for="text" class="font">
-      Criou a postagem?
-      <RouterLink to="/mural">Mural</RouterLink>
-    </label>
   </div>
 </template>
 
@@ -258,5 +254,21 @@ button:hover {
   color: green;
   text-align: center;
   font-weight: bold;
+}
+
+.btn-create {
+  margin: 10px 10px;
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #42b983;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-create:hover {
+  background-color: #2c8a65;
 }
 </style>

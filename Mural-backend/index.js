@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
+const notificationsRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 app.use('/posts', postsRoutes);
+app.use('/notifications', notificationsRoutes);
 
 const PORT = process.env.PORT || 4000;
 
