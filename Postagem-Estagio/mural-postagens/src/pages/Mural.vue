@@ -9,18 +9,18 @@
         @click="togglePopup"
         aria-haspopup="dialog"
         :aria-expanded="showPopup.toString()"
-      >🔔
+      >
+        🔔
         <span v-if="unreadCount > 0" class="notif-badge">{{ unreadCount }}</span>
-    </button>
+      </button>
 
       <button v-if="isAdmin" @click="logout" class="btn-logout">Sair</button>
     </div>
 
     <div class="mural-container">
-
       <div class="actions" v-if="isAdmin">
-        <router-link to="/create-post" class="btn-create"> Nova Postagem</router-link>
-        <router-link to="/archived-posts" class="btn-archive"> Histórico de Postagens </router-link>
+        <router-link to="/create-post" class="btn-create">Nova Postagem</router-link>
+        <router-link to="/archived-posts" class="btn-archive">Histórico de Postagens</router-link>
       </div>
 
       <h1>Vagas</h1>
@@ -62,17 +62,26 @@
       </div>
     </div>
 
-    <!-- OVERLAY + POPUP de notificações (aparece apenas se isAdmin && showPopup) -->
     <div v-if="isAdmin && showPopup" class="overlay" @click.self="closePopup">
       <div class="popup" role="dialog" aria-label="Notificações">
         <div class="popup-header">
           <h3>Notificações</h3>
+
+          <button class="clear-btn" @click="clearAllNotifications">
+            Limpar todas
+          </button>
+
           <button class="close-btn" @click="closePopup" aria-label="Fechar">✕</button>
         </div>
 
         <div class="popup-content">
           <ul v-if="notifications.length > 0" class="notif-list">
-            <li v-for="(n, i) in notifications" :key="i" class="notif-item" @click="markAsRead(n.id)">
+            <li
+              v-for="(n, i) in notifications"
+              :key="n.id"
+              class="notif-item"
+              @click="markAsRead(n.id)"
+            >
               <strong>{{ n.title }}</strong>
               <p class="notif-text">{{ n.message }}</p>
               <small class="notif-date">{{ formatDate(n.created_at) }}</small>
@@ -121,8 +130,10 @@ export default {
       try {
         const response = await fetch("http://localhost:4000/posts");
         if (!response.ok) throw new Error("Erro ao carregar postagens");
+
         const data = await response.json();
         const now = new Date();
+
         this.posts = data
           .filter(post => new Date(post.expires_at) > now)
           .map(post => ({
@@ -138,15 +149,15 @@ export default {
       if (!confirm("Tem certeza que deseja excluir esta postagem?")) return;
       try {
         const token = localStorage.getItem("token");
+
         const response = await fetch(`http://localhost:4000/posts/${id}`, {
           method: "DELETE",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error("Erro ao excluir postagem");
-        alert("Postagem excluída com sucesso!");
-        await this.loadPosts(); // Atualiza a lista
+
+        await this.loadPosts();
+
       } catch (err) {
         console.error(err);
         alert("Erro ao excluir postagem");
@@ -169,91 +180,132 @@ export default {
         this.currentIndex += 3;
       }
     },
+
     prevGroup() {
       if (this.currentIndex > 0) {
         this.currentIndex -= 3;
       }
     },
+
     formatDate(dateString) {
       if (!dateString) return "Sem data de expiração";
+
       const date = new Date(dateString);
       if (isNaN(date)) return "Data Inválida";
-      const data = date.toLocaleDateString('pt-BR');
-      const hora = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      const data = date.toLocaleDateString("pt-BR");
+      const hora = date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
       return `${data} às ${hora}`;
     },
 
-    togglePopup() {
+    async togglePopup() {
       this.showPopup = !this.showPopup;
+
       if (this.showPopup) {
-        this.loadNotifications();
+        await this.loadNotifications();
+
+        await this.markAllReadBackend();
+
+        this.notifications = this.notifications.map(n => ({ ...n, read: true }));
       }
     },
+
     closePopup() {
       this.showPopup = false;
     },
 
     async loadNotifications() {
       try {
-        // Exemplo: buscar em /notifications (apenas quando disponível no backend)
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn("Token não encontrado - usuario pode não estar autenticado");
-          this.notifications = [];
-          return;
-        }
-        const res = await fetch('http://localhost:4000/notifications', {
-          method: "GET",
-          headers: { 
-            "Content-type": "application/json",          
-            Authorization: `Bearer ${token}` 
-          }
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch("http://localhost:4000/notifications", {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (res.status === 401) {
-          console.warn("Não autorizado ao buscar notificações");
-          this.notifications = [];
-          return;
-        }
-
-        if (!res.ok) throw new Error('Erro ao carregar notificações');
+        if (!res.ok) throw new Error("Erro ao carregar notificações");
 
         const data = await res.json();
 
-        this.notifications = data.map(n => ({ ...n, created_at: n.created_at ? new Date(n.created_at) : null}));
+        this.notifications = data.map(n => ({
+          ...n,
+          created_at: n.created_at ? new Date(n.created_at) : null
+        }));
+
       } catch (err) {
         console.error("Erro ao carregar notificações:", err);
-        this.notifications = [];
       }
     },
 
-    async markAsRead(notificationId) {
+    async markAllReadBackend() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await fetch('http://localhost:4000/notifications/mark-all-read', {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          console.warn('markAllReadBackend: resposta não ok', res.status);
+        }
+      } catch (err) {
+        console.error('Erro em markAllReadBackend:', err);
+      }
+    },
+
+    async clearAllNotifications() {
+      if (!confirm("Tem certeza que deseja limpar todas as notificações?")) return;
+
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await fetch(`http://localhost:4000/notifications/${notificationId}/read`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
+        const res = await fetch("http://localhost:4000/notifications/clear", {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!res.ok) throw new Error("Erro ao marcar como lida");
+        if (!res.ok) throw new Error("Erro ao limpar notificações");
 
-        this.notifications = this.notifications.filter(n => n.id !== notificationId);
-
-
+        this.notifications = [];
       } catch (err) {
-        console.error("Erro ao marcar como lida:", err);
+        console.error("Erro ao limpar notificações:", err);
       }
-    },
+    }
   }
-}
+};
 </script>
 
 <style scoped>
+
+.clear-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  margin-right: auto;
+}
+
+.clear-btn:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+.clear-btn:active {
+  transform: scale(0.95);
+  background-color: #a93226;
+}
+
 .btn-notifications {
   display: inline-block;
   padding: 8px 12px;
@@ -275,9 +327,9 @@ export default {
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
-  justify-content: flex-end; /* popup à direita */
+  justify-content: flex-end;
   align-items: flex-start;
-  padding: 70px 30px 0 0; /* posiciona abaixo da área superior */
+  padding: 70px 30px 0 0;
   z-index: 9999;
 }
 

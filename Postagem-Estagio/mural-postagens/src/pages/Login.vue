@@ -81,7 +81,6 @@ export default {
         localStorage.setItem("loggedUser", data.admin.username);
 
         this.errorMessage = "";
-        alert("Login realizado com sucesso!");
         this.$router.push("/mural");
       } catch (error) {
         console.error("Erro no login:", error);

@@ -1,4 +1,3 @@
-// routes/notifications.js
 const express = require('express');
 const db = require('../db');
 const router = express.Router();
@@ -71,12 +70,50 @@ router.patch('/:id/read', authenticate, requireAdmin, async (req, res) => {
       `UPDATE notifications SET read = true WHERE id = $1 RETURNING id, read`,
       [id]
     );
-    if (result.rowCount === 0) return res.status(404).json({ error: 'Notificação não encontrada' });
+    if (result.rowCount === 0)
+      return res.status(404).json({ error: 'Notificação não encontrada' });
+
     res.json(result.rows[0]);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao atualizar notificação' });
   }
+});
+
+router.put('/mark-all-read', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await db.query(
+      `UPDATE notifications SET read = true WHERE read = false`
+    );
+
+    res.json({
+      message: "Todas as notificações foram marcadas como lidas",
+      updated: result.rowCount
+    });
+
+  } catch (error) {
+    console.error("Erro ao marcar todas como lidas:", error);
+    res.status(500).json({ error: "Erro interno no servidor" });
+  }
+});
+
+router.delete('/clear', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await db.query(`DELETE FROM notifications`);
+    res.json({ message: "Todas as notificações foram apagadas." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao limpar notificações" });
+  }
+});
+
+router.patch("/notifications/read-all", async (req, res) => {
+  await prisma.notification.updateMany({
+    where: { userId: req.user.id },
+    data: { read: true }
+  });
+  res.sendStatus(200);
 });
 
 module.exports = router;

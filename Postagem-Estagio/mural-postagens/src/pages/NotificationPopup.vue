@@ -1,10 +1,13 @@
 <template>
   <div class="notif-wrapper" v-if="visible" @keydown.esc="close" tabindex="-1" ref="container">
-    <div class="notif-card" role="dialog" :aria-label="'Notificações'">
+    <div class="notif-card" role="dialog" aria-label="Notificações">
+
       <header class="notif-header">
         <h3>Notificações</h3>
         <div class="header-actions">
-          <button class="btn-small" @click="markAllRead" :disabled="notifications.length === 0">Marcar todas lidas</button>
+          <button class="btn-small" @click="markAllRead" :disabled="notifications.length === 0">
+            Marcar todas lidas
+          </button>
           <button class="btn-close" @click="close" aria-label="Fechar">✕</button>
         </div>
       </header>
@@ -14,114 +17,134 @@
           Sem notificações
         </div>
 
-        <ul v-if="notifications.length > 0" class="notif-list">
-        <li v-for="(n, i) in notifications" :key="n.id" class="notif-item" :class="{ 'notif-unread': !n.read }">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-            <div style="flex:1;">
+        <ul v-else class="notif-list">
+          <li
+            v-for="n in notifications"
+            :key="n.id"
+            class="notif-item"
+            :class="{ 'notif-unread': !n.read }"
+          >
+            <div style="display:flex; justify-content:space-between; gap:8px;">
+              
+              <div style="flex:1;">
                 <strong>{{ n.title }}</strong>
                 <p class="notif-text">{{ n.message }}</p>
                 <small class="notif-date">{{ formatDate(n.created_at) }}</small>
-            </div>
+              </div>
 
-            <div style="margin-left:8px; display:flex; flex-direction:column; gap:6px;">
-                <button v-if="!n.read" @click="markAsRead(n.id)" class="btn-mark-read">Marcar como lida</button>
+              <button
+                v-if="!n.read"
+                @click="markAsRead(n.id)"
+                class="btn-mark-read"
+              >
+                Marcar como lida
+              </button>
+
             </div>
-            </div>
-        </li>
+          </li>
         </ul>
       </main>
 
-      <footer class="notif-footer">
-        <button class="btn" @click="clearAll" :disabled="notifications.length===0">Limpar todas</button>
-      </footer>
+      <button class="notif-footer" @click="markAllRead">
+        Marcar todas como lidas
+      </button>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, nextTick } from "vue";
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  storageKey: { type: String, default: 'app_notifications' } // opcional
-})
-const emit = defineEmits(['update:modelValue', 'open', 'close', 'change'])
+  modelValue: Boolean,
+  apiUrl: { type: String, default: "http://localhost:4000" }
+});
+const emit = defineEmits(["update:modelValue", "open", "close"]);
 
-const visible = ref(props.modelValue)
-const container = ref(null)
-const notifications = ref([])
+const visible = ref(props.modelValue);
+const notifications = ref([]);
+const container = ref(null);
 
-// --- mock/init: carregue do localStorage (ou do backend no futuro)
-function loadFromStorage() {
+function open() {
+  visible.value = true;
+  emit("update:modelValue", true);
+  emit("open");
+  nextTick(() => container.value?.focus());
+}
+
+function close() {
+  visible.value = false;
+  emit("update:modelValue", false);
+  emit("close");
+}
+
+
+async function loadNotifications() {
   try {
-    const raw = localStorage.getItem(props.storageKey)
-    if (raw) {
-      notifications.value = JSON.parse(raw)
-    } else {
-      // Exemplo inicial (apenas se quiser começar com algo)
-      notifications.value = [
-        { id: 1, title: 'Bem-vindo', message: 'Notificações ativadas!', date: new Date().toISOString(), read: false },
-      ]
-      saveToStorage()
-    }
-  } catch (e) {
-    notifications.value = []
-    console.error('Erro ao carregar notificações', e)
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${props.apiUrl}/notifications`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error("Erro ao carregar notificações");
+
+    const data = await res.json();
+    notifications.value = data;
+
+  } catch (err) {
+    console.error("Erro ao carregar notificações:", err);
   }
 }
-function saveToStorage() {
-  localStorage.setItem(props.storageKey, JSON.stringify(notifications.value))
-  emit('change', notifications.value)
-}
 
-// --- manipulações
-function open() {
-  visible.value = true
-  emit('update:modelValue', true)
-  emit('open')
-  // foco para permitir ESC fechar
-  nextTick(() => container.value?.focus())
-}
-function close() {
-  visible.value = false
-  emit('update:modelValue', false)
-  emit('close')
-}
-
-function toggleRead(notif) {
-  notif.read = !notif.read
-  saveToStorage()
-}
-
-function markAllRead() {
-  notifications.value.forEach(n => n.read = true)
-  saveToStorage()
-}
-
-function remove(id) {
-  notifications.value = notifications.value.filter(n => n.id !== id)
-  saveToStorage()
-}
-
-function clearAll() {
-  if (!confirm('Remover todas as notificações?')) return
-  notifications.value = []
-  saveToStorage()
-}
-
-function formatTime(iso) {
+async function markAsRead(id) {
   try {
-    const d = new Date(iso)
-    return d.toLocaleString()
-  } catch { return iso }
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${props.apiUrl}/notifications/${id}/read`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Erro ao marcar como lida");
+
+    notifications.value = notifications.value.filter(n => n.id !== id);
+
+  } catch (err) {
+    console.error("Erro ao marcar como lida:", err);
+  }
 }
 
-// reatividade com prop v-model
-watch(() => props.modelValue, v => visible.value = v)
-watch(visible, v => emit('update:modelValue', v))
+async function markAllRead() {
+  try {
+    const token = localStorage.getItem("token");
 
-onMounted(() => loadFromStorage())
+    await fetch(`${props.apiUrl}/notifications/mark-all-read`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    notifications.value = [];
+
+  } catch (err) {
+    console.error("Erro ao marcar todas como lidas:", err);
+  }
+}
+
+function formatDate(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleString("pt-BR");
+}
+
+// Reatividade
+watch(() => props.modelValue, async (v) => {
+  visible.value = v;
+  if (v) await loadNotifications();
+});
 </script>
+
 
 <style scoped>
 .notif-wrapper {
