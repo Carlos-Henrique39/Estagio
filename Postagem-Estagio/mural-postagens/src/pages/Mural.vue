@@ -112,7 +112,7 @@ export default {
   },
   computed: {
     visiblePosts() {
-      return this.posts.slice(this.currentIndex, this.currentIndex + 3);
+      return this.posts.slice(this.currentIndex, this.currentIndex + 4);
     },
     unreadCount() {
       return this.notifications.filter(n => !n.read).length;
@@ -541,7 +541,7 @@ export default {
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-  width: 280px;
+  width: 220px;
   min-height: 340px;
   transition: transform 0.3s ease, opacity 0.3s ease;
   text-align: left;
@@ -592,10 +592,10 @@ export default {
   cursor: not-allowed;
 }
 .arrow.left {
-  left: -60px;
+  left: -150px;
 }
 .arrow.right {
-  right: -60px;
+  right: -150px;
 }
 
 .fade-enter-active, 
