@@ -26,7 +26,7 @@
       </div>
 
       <div class="form-group">
-        <label for="image">Imagem (opcional):</label>
+        <label for="image">Imagem:</label>
         <input type="file" id="image" @change="handleImage" accept="image/*" />
         <img
           v-if="image"
@@ -35,6 +35,33 @@
           class="preview_img"
         
         />
+      </div>
+
+      <div class="form-group">
+        <label>Links:</label>
+
+        <div v-for="(link, index) in links" :key="index" class="link-item">
+          <input 
+            type="text" 
+            v-model="links[index]" 
+            placeholder="https://exemplo.com"
+          />
+          <button type="button" class="button2" @click="removeLink(index)">✕</button>
+        </div>
+
+        <button type="button" class="button1" @click="addLink">+ Adicionar link</button>
+      </div>
+
+      <div class="form-group">
+        <label>Arquivos anexos:</label>
+
+        <input type="file" multiple @change="handleFiles" />
+
+        <ul class="file-list">
+          <li v-for="f in files" :key="f.name">
+            📄 {{ f.name }}
+          </li>
+        </ul>
       </div>
 
       <div class="form-group">
@@ -47,7 +74,7 @@
         <input type="time" id="expiresTime" v-model="expiresTime" required />
       </div>
 
-      <button type="submit">
+      <button class="button1" type="submit">
         {{ isEditing ? "Salvar Alterações" : "Salvar Postagem" }}
       </button>
     </form>
@@ -62,6 +89,8 @@ export default {
       title: "",
       description: "",
       image: null,
+      links: [],
+      files: [],
       expires_at: "",
       expiresTime: "",
       isEditing: false,
@@ -86,10 +115,12 @@ export default {
         if (!response.ok) throw new Error("Erro ao carregar postagem.");
         const post = await response.json();
 
-        // Preenche os campos do formulário
         this.title = post.title;
         this.description = post.description;
         this.image = post.image || null;
+
+        this.links = Array.isArray(post.links) ? post.links : [];
+        this.files = Array.isArray(post.files) ? post.files : [];
 
         if (post.expires_at) {
           const date = new Date(post.expires_at);
@@ -113,6 +144,10 @@ export default {
     },
 
     async addPost() {
+
+      if (!Array.isArray(this.links)) this.links = [];
+      if (!Array.isArray(this.files)) this.files = [];
+
       if (!this.title || !this.description || !this.expires_at || !this.expiresTime) {
         alert("Por favor, preencha todos os campos obrigatórios.");
         return;
@@ -128,11 +163,15 @@ export default {
         return;
       }
 
+      this.links = this.links.filter(l => l && l.trim() !== "");
+
       const postData = {
         title: this.title,
         description: this.description,
         image: this.image,
         expires_at: expirationDate.toISOString(),
+        links: this.links,
+        files: this.files
       };
 
       try {
@@ -161,10 +200,32 @@ export default {
         alert("Erro: " + error.message);
       }
     },
+
+    addLink() {
+      this.links.push("");
+    },
+
+    removeLink(index) {
+      this.links.splice(index, 1);
+    },
+
+    handleFiles(event) {
+      const selected = Array.from(event.target.files);
+
+      selected.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.files.push({
+            name: file.name,
+            data: reader.result
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    },
   },
 };
 </script>
-
 
 <style scoped>
 
@@ -232,7 +293,7 @@ input[type="time"]{
   border-radius: 4px;
 }
 
-button {
+.button1 {
   justify-content: center;
   margin-left: 10px;
   width: 975px;
@@ -245,9 +306,22 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.button1:hover {
   background-color: #369870;
 }
+
+.button2 {
+  justify-content: center;
+  margin-left: 10px;
+  padding: 7px;
+  background-color: #e61a1a;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 
 .success-message {
   margin-top: 15px;

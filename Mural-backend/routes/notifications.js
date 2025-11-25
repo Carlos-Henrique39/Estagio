@@ -5,40 +5,35 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
-
     const postsExpiringSoon = await db.query(`
-      SELECT id, title, expires_at
+      SELECT id, title, expires_at, notified_once
       FROM posts
       WHERE is_active = true
         AND expires_at IS NOT NULL
         AND expires_at > NOW()
         AND expires_at < NOW() + INTERVAL '24 HOURS'
+        AND notified_once = false
     `);
 
     for (const post of postsExpiringSoon.rows) {
+      await db.query(`
+        INSERT INTO notifications (title, message, post_id, created_at, read)
+        VALUES ($1, $2, $3, NOW(), false)
+      `, [
+        "Post expirando em breve",
+        `A postagem "${post.title}" irá expirar hoje.`,
+        post.id
+      ]);
 
-      const exists = await db.query(`
-        SELECT id FROM notifications WHERE post_id = $1
-      `, [post.id]);
-
-      if (exists.rowCount === 0) {
-        await db.query(`
-          INSERT INTO notifications (title, message, post_id, created_at, read)
-          VALUES ($1, $2, $3, NOW(), false)
-        `, [
-          "Post expirando em breve",
-          `A postagem "${post.title}" irá expirar dentro de 24 horas.`,
-          post.id
-        ]);
-      }
+      await db.query(`UPDATE posts SET notified_once = true WHERE id = $1`, [post.id]);
     }
 
-    const result = await db.query(
-      `SELECT id, title, message, created_at, read 
-       FROM notifications
-       ORDER BY created_at DESC 
-       LIMIT 100`
-    );
+    const result = await db.query(`
+      SELECT id, title, message, created_at, read 
+      FROM notifications
+      ORDER BY created_at DESC 
+      LIMIT 100
+    `);
 
     res.json(result.rows);
 
@@ -53,7 +48,8 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const result = await db.query(
       `INSERT INTO notifications (title, message, target_all, created_at, read)
-       VALUES ($1,$2,$3, NOW(), false) RETURNING id, title, message, created_at, read`,
+       VALUES ($1,$2,$3, NOW(), false)
+       RETURNING id, title, message, created_at, read`,
       [title, message, target_all]
     );
     res.status(201).json(result.rows[0]);
@@ -106,14 +102,6 @@ router.delete('/clear', authenticate, requireAdmin, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Erro ao limpar notificações" });
   }
-});
-
-router.patch("/notifications/read-all", async (req, res) => {
-  await prisma.notification.updateMany({
-    where: { userId: req.user.id },
-    data: { read: true }
-  });
-  res.sendStatus(200);
 });
 
 module.exports = router;

@@ -5,7 +5,7 @@ const { authenticate, requireAdmin }= require('../middleware/auth');
 
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { title, description, image, expires_at } = req.body;
+    const { title, description, image, expires_at, links, files } = req.body;
     const author_id = req.user.id;
 
     if (!title || !description) {
@@ -13,10 +13,18 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     }
 
     const result = await db.query(
-      `INSERT INTO posts (title, description, image, author_id, expires_at)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO posts (title, description, image, author_id, expires_at, links, files)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, title, description, image, author_id, created_at, expires_at, is_active`,
-      [title, description, image, author_id, expires_at || null]
+      [
+        title, 
+        description, 
+        image, 
+        author_id, 
+        expires_at || null, 
+        JSON.stringify(links ||[]), 
+        JSON.stringify(files ||[]) 
+      ]
     );
 
     res.status(201).json({ post: result.rows[0] });
@@ -28,15 +36,23 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
 
 router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { title, description, image, expires_at } = req.body;
+  const { title, description, image, expires_at, links, files } = req.body;
 
   try {
     const result = await db.query(
       `UPDATE posts
-       SET title = $1, description = $2, image = $3, expires_at = $4
-       WHERE id = $5
+       SET title = $1, description = $2, image = $3, expires_at = $4, links = $5, files = $6
+       WHERE id = $7
        RETURNING *`,
-      [title, description, image, expires_at || null, id]
+      [
+        title, 
+        description, 
+        image, 
+        expires_at || null, 
+        JSON.stringify(links ||[]), 
+        JSON.stringify(files ||[]), 
+        id
+      ]
     );
 
     if (result.rowCount === 0) {
@@ -119,7 +135,5 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar postagem específica' });
     }
 });
-
-
 
 module.exports = router;

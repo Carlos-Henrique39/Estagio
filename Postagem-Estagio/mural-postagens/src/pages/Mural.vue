@@ -41,8 +41,23 @@
             class="post-card"
           >
             <h2>{{ post.title }}</h2>
-            <p class="descricao">{{ post.description }}</p>
             <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+            <p class="descricao">{{ post.description }}</p>
+            <div v-if="post.links && post.links.length > 0" class="links-section">
+              <ul>
+                <li v-for="(l, i) in post.links" :key="i">
+                  <a :href="l" target="_blank">{{ l }}</a>
+                </li>
+              </ul>
+            </div>
+
+            <div v-if="post.files && post.files.length > 0" class="files-section">
+              <ul>
+                <li v-for="(f, i) in post.files" :key="i">
+                  <a :href="f.data" :download="f.name">📄 {{ f.name }}</a>
+                </li>
+              </ul>
+            </div>
             <p class="expira-em">Expira em: {{ formatDate(post.expires_at) }}</p>
 
             <div v-if="isAdmin" class="post-actions">
@@ -428,6 +443,7 @@ export default {
 }
 
 .btn-edit, .btn-delete {
+  margin-left: 10px;
   padding: 6px 10px;
   border: none;
   border-radius: 4px;
@@ -619,6 +635,61 @@ export default {
   border-radius:12px;
   margin-left:8px;
   vertical-align:middle;
+}
+
+.links-section {
+  margin-top: 15px;
+}
+
+.links-section ul {
+  padding-left: 15px;
+  margin: 0;
+}
+
+.links-section li {
+  margin-bottom: 6px;
+}
+
+.links-section a {
+  color: #64d1a7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  word-break: break-word;
+}
+
+.links-section a:hover {
+  color: #42b983;
+  text-decoration: underline;
+}
+
+.files-section {
+  margin-top: 15px;
+}
+
+.files-section ul {
+  padding-left: 15px;
+  margin: 0;
+}
+
+.files-section li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.files-section a {
+  color: #c4c4ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  word-break: break-word;
+}
+
+.files-section a:hover {
+  color: #8a8aff;
+  text-decoration: underline;
 }
 
 </style>
