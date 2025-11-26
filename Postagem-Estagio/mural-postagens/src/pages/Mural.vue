@@ -21,6 +21,17 @@
       <div class="actions" v-if="isAdmin">
         <router-link to="/create-post" class="btn-create">Nova Postagem</router-link>
         <router-link to="/archived-posts" class="btn-archive">Histórico de Postagens</router-link>
+        <div class="layout-dropdown">
+          <button @click="toggleLayoutMenu" class="btn-layout">
+            Layout: {{ layoutLabel }}
+          </button>
+
+          <div v-if="showLayoutMenu" class="dropdown-menu">
+            <button @click="selectLayout('carousel')">Carrossel</button>
+            <button @click="selectLayout('grid')">Grid</button>
+            <button @click="selectLayout('list')">Lista</button>
+          </div>
+        </div>
       </div>
 
       <h1>Vagas</h1>
@@ -29,7 +40,7 @@
         Nenhuma postagem disponível no momento.
       </p>
 
-      <div v-else class="carousel">
+      <div v-if="layout === 'carousel'" class="carousel">
         <button class="arrow left" @click="prevGroup" :disabled="currentIndex === 0">
           ◀
         </button>
@@ -75,6 +86,72 @@
           ▶
         </button>
       </div>
+
+      <div v-if="layout === 'grid'" class="grid">
+        <div v-for="post in posts" :key="post.id" class="grid-card">
+          <h2>{{ post.title }}</h2>
+          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+          <p class="descricao">{{ post.description }}</p>
+
+          <div v-if="post.links && post.links.length > 0" class="links-section">
+            <ul>
+              <li v-for="(l, i) in post.links" :key="i">
+                <a :href="l" target="_blank">{{ l }}</a>
+              </li>
+            </ul>
+          </div>
+
+          <div v-if="post.files && post.files.length > 0" class="files-section">
+            <ul>
+              <li v-for="(f, i) in post.files" :key="i">
+                <a :href="f.data" :download="f.name">📄 {{ f.name }}</a>
+              </li>
+            </ul>
+          </div>
+
+          <p class="expira-em">Expira em: {{ formatDate(post.expires_at) }}</p>
+
+          <div v-if="isAdmin" class="post-actions">
+            <button @click="editPost(post.id)" class="btn-edit">Editar</button>
+            <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="layout === 'list'" class="list">
+        <div v-for="post in posts" :key="post.id" class="list-item">
+          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+
+          <div class="list-info">
+            <h2>{{ post.title }}</h2>
+            <p class="descricao">{{ post.description }}</p>
+
+            <div v-if="post.links && post.links.length" class="links-section">
+              <ul>
+                <li v-for="(l, i) in post.links" :key="i">
+                  <a :href="l" target="_blank">{{ l }}</a>
+                </li>
+              </ul>
+            </div>
+
+            <div v-if="post.files && post.files.length" class="files-section">
+              <ul>
+                <li v-for="(f, i) in post.files" :key="i">
+                  <a :href="f.data" :download="f.name">📄 {{ f.name }}</a>
+                </li>
+              </ul>
+            </div>
+
+            <p class="expira-em">Expira em: {{ formatDate(post.expires_at) }}</p>
+
+            <div v-if="isAdmin" class="post-actions">
+              <button @click="editPost(post.id)" class="btn-edit">Editar</button>
+              <button @click="deletePost(post.id)" class="btn-delete">Excluir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div v-if="isAdmin && showPopup" class="overlay" @click.self="closePopup">
@@ -123,9 +200,20 @@ export default {
       currentIndex: 0,
       showPopup: false,
       notifications: [],
+      showLayoutMenu: false,
+      layout: "carousel", // ou "grid" ou "list"
     };
   },
   computed: {
+
+    layoutLabel() {
+      return {
+        carousel: "Carrossel",
+        grid: "Grid",
+        list: "Lista"
+      }[this.layout];
+    },
+
     visiblePosts() {
       return this.posts.slice(this.currentIndex, this.currentIndex + 4);
     },
@@ -141,6 +229,19 @@ export default {
     }
   },
   methods: {
+
+    toggleLayoutMenu() {
+      this.showLayoutMenu = !this.showLayoutMenu;
+    },
+    selectLayout(mode) {
+      this.layout = mode;
+      this.showLayoutMenu = false;
+    },
+
+    setLayout(mode) {
+      this.layout = mode;
+    },
+
     async loadPosts() {
       try {
         const response = await fetch("http://localhost:4000/posts");
@@ -299,6 +400,103 @@ export default {
 
 <style scoped>
 
+.layout-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-layout {
+  margin-left: 10px;
+  background: #2c3e50;
+  color: white;
+  padding: 12px 15px; 
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 8px 0;
+  z-index: 999;
+  width: 160px;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-menu button:hover {
+  background: #f0f0f0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.grid-card {
+  background: #2a2a2a;
+  color: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  width: 220px;
+  min-height: 340px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  text-align: left;
+}
+
+.grid-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.list-item {
+  display: flex;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  gap: 16px;
+  background: #2a2a2a;
+  color: #fff;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  text-align: left;
+}
+
+.list-item img {
+  width: 160px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.list-info {
+  flex: 1;
+}
+
 .clear-btn {
   background-color: #e74c3c;
   color: white;
@@ -414,7 +612,6 @@ export default {
   color: #ddd;
 }
 
-/* --- Restante do seu CSS mantido --- */
 .btn-archive {
   display: inline-block;
   padding: 10px 15px;
