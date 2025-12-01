@@ -11,9 +11,36 @@
       <div v-if="expiredPosts.length" class="cards">
         <div v-for="post in expiredPosts" :key="post.id" class="card">
           <h2>{{ post.title }}</h2>
+          <img v-if="post.image" 
+          :src="post.image" 
+          alt="Imagem da Postagem"
+          @click="openImageModal(post.image)"
+          class="post-image clickable-img"
+          />
           <p>{{ post.description }}</p>
+          <div v-if="post.links && post.links.length" class="links">
+            <h3>Links:</h3>
+            <ul>
+              <li v-for="(l, i) in post.links" :key="i">
+                <a :href="l" target="_blank">{{ l }}</a>
+              </li>
+            </ul>
+          </div>
+
+          <div v-if="post.files && post.files.length" class="files">
+            <h3>Arquivos:</h3>
+            <ul>
+              <li v-for="(f, i) in post.files" :key="i">
+                <a :href="f.data" :download="f.name">📄 {{ f.name }}</a>
+              </li>
+            </ul>
+          </div>
           <p class="expiracao">Expirou em: {{ formatDate(post.expires_at) }}</p>
         </div>
+      </div>
+
+      <div v-if="showImageModal" class="image-modal" @click="closeImageModal">
+        <img :src="modalImageSrc" class="modal-image" @click.stop>
       </div>
 
       <p v-else class="vazio">Nenhuma postagem arquivada.</p>
@@ -27,6 +54,8 @@ export default {
   data() {
     return {
       expiredPosts: [],
+      showImageModal: false,
+      modalImageSrc: "",
     };
   },
   async mounted() {
@@ -42,6 +71,16 @@ export default {
     }
   },
   methods: {
+
+    openImageModal(src) {
+      this.modalImageSrc = src;
+      this.showImageModal = true;
+    },
+
+    closeImageModal() {
+      this.showImageModal = false;
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString);
       const data = date.toLocaleDateString("pt-BR");
@@ -58,6 +97,45 @@ export default {
 </script>
 
 <style scoped>
+
+.clickable-img {
+  cursor: zoom-in;
+}
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  cursor: zoom-out;
+}
+
+.image-modal img.modal-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 10px;
+  cursor: default;
+}
+
+.post-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.links ul, .files ul {
+  list-style: none;
+  padding: 0;
+}
+
+.links a, .files a {
+  color: #42b983;
+  text-decoration: underline;
+}
+
 .background {
   min-height: 100vh;
   background-color: #212121;

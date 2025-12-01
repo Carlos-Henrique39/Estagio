@@ -109,10 +109,19 @@ router.get('/', async (req, res) => {
 router.get('/expired', authenticate, requireAdmin, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT * FROM posts 
-       WHERE expires_at <= NOW() 
-       ORDER BY expires_at DESC
+      `SELECT 
+        id,
+        title,
+        description,
+        image,
+        links,
+        files,
+        expires_at
+      FROM posts 
+      WHERE expires_at <= NOW() 
+      ORDER BY expires_at DESC
     `);
+    
     res.json(result.rows);
   } catch (err) {
     console.error(err);
