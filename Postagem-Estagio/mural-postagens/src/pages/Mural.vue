@@ -52,7 +52,7 @@
             class="post-card"
           >
             <h2>{{ post.title }}</h2>
-            <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+            <img v-if="post.image" :src="post.image" alt="Imagem da postagem" @click="openImageModal(post.image)" class="clickable-image"/>
             <p class="descricao">{{ post.description }}</p>
             <div v-if="post.links && post.links.length > 0" class="links-section">
               <ul>
@@ -90,7 +90,7 @@
       <div v-if="layout === 'grid'" class="grid">
         <div v-for="post in posts" :key="post.id" class="grid-card">
           <h2>{{ post.title }}</h2>
-          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" @click="openImageModal(post.image)" class="clickable-image"/>
           <p class="descricao">{{ post.description }}</p>
 
           <div v-if="post.links && post.links.length > 0" class="links-section">
@@ -120,7 +120,7 @@
 
       <div v-if="layout === 'list'" class="list">
         <div v-for="post in posts" :key="post.id" class="list-item">
-          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" />
+          <img v-if="post.image" :src="post.image" alt="Imagem da postagem" @click="openImageModal(post.image)" class="clickable-image"/>
 
           <div class="list-info">
             <h2>{{ post.title }}</h2>
@@ -152,6 +152,10 @@
         </div>
       </div>
 
+      <div v-if="showImageModal" class="image-modal" @click.self="closeImageModal">
+        <span class="close-image" @click="closeImageModal">✕</span>
+        <img :src="currentImage" class="modal-image" alt="imagem ampliada" />
+      </div>
     </div>
 
     <div v-if="isAdmin && showPopup" class="overlay" @click.self="closePopup">
@@ -202,6 +206,8 @@ export default {
       notifications: [],
       showLayoutMenu: false,
       layout: "carousel", // ou "grid" ou "list"
+      showImageModal: false,
+      currentImage: null,
     };
   },
   computed: {
@@ -229,6 +235,16 @@ export default {
     }
   },
   methods: {
+
+    openImageModal(image) {
+      this.currentImage = image;
+      this.showImageModal = true;
+    },
+
+    closeImageModal() {
+      this.showImageModal = false;
+      this.currentImage = null;
+    },
 
     toggleLayoutMenu() {
       this.showLayoutMenu = !this.showLayoutMenu;
@@ -323,9 +339,7 @@ export default {
 
       if (this.showPopup) {
         await this.loadNotifications();
-
         await this.markAllReadBackend();
-
         this.notifications = this.notifications.map(n => ({ ...n, read: true }));
       }
     },
@@ -399,6 +413,45 @@ export default {
 </script>
 
 <style scoped>
+
+.clickable-image {
+  cursor: zoom-in;
+  transition: 0.2s;
+}
+
+.clickable-image:hover {
+  opacity: 0.85;
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modal-image {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #000;
+}
+
+.close-image {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 35px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
 
 .layout-dropdown {
   position: relative;
