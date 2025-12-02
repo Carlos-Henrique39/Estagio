@@ -7,6 +7,12 @@
 
     <div class="container">
       <h1>📁 Histórico de Postagens</h1>
+      <button class="btn-download" @click="toggleDownloadMenu">⬇ Download</button>
+
+      <div v-if="showDownloadMenu" class="download-menu">
+        <button @click="downloadCSV">📄 Baixar CSV</button>
+        <button @click="downloadPDF">📕 Baixar PDF</button>
+      </div>
 
       <div v-if="expiredPosts.length" class="cards">
         <div v-for="post in expiredPosts" :key="post.id" class="card">
@@ -49,13 +55,14 @@
 </template>
 
 <script>
-export default {
-  name: "ArchivedPosts",
+  export default {
+    name: "ArchivedPosts",
   data() {
     return {
       expiredPosts: [],
       showImageModal: false,
       modalImageSrc: "",
+      showDownloadMenu: false,
     };
   },
   async mounted() {
@@ -71,6 +78,50 @@ export default {
     }
   },
   methods: {
+
+    toggleDownloadMenu() {
+      this.showDownloadMenu = !this.showDownloadMenu;
+    },
+
+    downloadCSV() {
+      const rows = [
+        ["Título", "Descrição", "Imagem", "Links", "Arquivos", "Expirou em"],
+        ...this.expiredPosts.map(p => [
+          p.title,
+          p.description,
+          p.links?.join(" | ") || "",
+          p.files?.map(f => f.name).join(" | ") || "",
+          this.formatDate(p.expires_at)
+        ])
+      ];
+
+      const csv = rows.map(r => r.map(v =>
+      `"${String(v).replace(/"/g, '""')}"`
+      ).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "historico.csv";
+      link.click();
+    },
+
+    async downloadPDF() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:4000/posts/expired/export/pdf", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "historico.pdf";
+        link.click();
+      } catch (err) {
+        console.error("Erro ao baixar PDF", err);
+      }
+    },
 
     openImageModal(src) {
       this.modalImageSrc = src;
@@ -92,11 +143,45 @@ export default {
       localStorage.removeItem("token");
       this.$router.push("/login");
     },
-  },
+  }
 };
 </script>
 
 <style scoped>
+
+.btn-download {
+  background-color: #3498db;
+  padding: 10px 15px;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.download-menu {
+  display: flex;
+  flex-direction: column;
+  background: #333;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  gap: 8px;
+}
+
+.download-menu button {
+  background: #444;
+  color: white;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.download-menu button:hover {
+  background: #555;
+}
 
 .clickable-img {
   cursor: zoom-in;

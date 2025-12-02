@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { authenticate, requireAdmin }= require('../middleware/auth');
+const PDFDocument = require("pdfkit");
 
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -126,6 +127,48 @@ router.get('/expired', authenticate, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao buscar postagens expiradas' });
+  }
+});
+
+router.get("/expired/export/pdf", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT id, title, description, image, links, files, expires_at
+      FROM posts
+      WHERE expires_at <= NOW()
+      ORDER BY expires_at DESC
+    `);
+
+    const posts = result.rows;
+
+    const doc = new PDFDocument({ margin: 40 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=historico.pdf");
+    doc.pipe(res);
+
+    doc.fontSize(22).text("Histórico de Postagens Expiradas", { align: "center" });
+    doc.moveDown(2);
+
+    posts.forEach((p) => {
+      doc.fontSize(16).text(p.title, { underline: true });
+
+      doc.fontSize(12).text(`Descrição: ${p.description}`);
+      
+      doc.text(`Expirou em: ${p.expires_at}`);
+
+      if (p.links?.length) doc.text(`Links: ${p.links.join(", ")}`);
+
+      if (p.files?.length) {
+        doc.text("Arquivos:");
+        p.files.forEach(f => doc.text("- " + f.name));
+      }
+      doc.moveDown(1.5);
+    });
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao gerar PDF" });
   }
 });
 

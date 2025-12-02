@@ -12,7 +12,11 @@ CREATE TABLE IF NOT EXISTS posts (
   author_id INTEGER NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   expires_at TIMESTAMP WITH TIME ZONE,
-  is_active BOOLEAN DEFAULT TRUE
+  is_active BOOLEAN DEFAULT TRUE,
+  image TEXT,
+  links JSONB DEFAULT '[]'::jsonb,
+  files JSONB DEFAULT '[]'::jsonb,
+  notified_once BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS expired_posts (
@@ -22,4 +26,16 @@ CREATE TABLE IF NOT EXISTS expired_posts (
   description TEXT,
   author_id INTEGER,
   expired_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    target_all BOOLEAN DEFAULT TRUE,
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT now(),
+    post_id INTEGER,
+    repeat_stage VARCHAR(20),
+    last_sent DATE
 );
