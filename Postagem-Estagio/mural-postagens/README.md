@@ -25,14 +25,33 @@ npm install
 
 ### Entre nas cordenadas do arquivo certo
 
+### Front-end
 ```sh
 cd .\Postagem-Estagio\mural-postagens\ 
 ```
 
-### Compilar e recarregar rapidamente para desenvolvimento
+### Compilar e recarregar rapidamente para desenvolvimento do Front-end
 
 ```sh
 npm run dev
+```
+
+### Back-end
+
+```sh
+cd .\Mural-backend\ 
+```
+
+### Compilar e recarregar rapidamente para desenvolvimento do Back-end
+
+```sh
+node index.js
+```
+
+### No frontend voce vai na direção do localhost.
+
+```sh
+Local: http://localhost:5173/
 ```
 
 Ao realizar essas etapas você iria ver o jeito que realizei o projeto.
