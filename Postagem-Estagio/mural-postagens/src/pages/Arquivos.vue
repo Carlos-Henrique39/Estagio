@@ -150,9 +150,10 @@
 <style scoped>
 
 .btn-download {
+  display: inline-block;
   background-color: #3498db;
   padding: 10px 15px;
-  color: white;
+  color: black;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -161,18 +162,22 @@
 }
 
 .download-menu {
+  position: relative;
+  margin: 10px auto;         
+  width: 180px;               
+  background: #2c2c2c;
+  padding: 10px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  background: #333;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
   gap: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+
 .download-menu button {
-  background: #444;
-  color: white;
+  background-color: rgb(165, 161, 161);
+  color: black;
   padding: 8px;
   border-radius: 5px;
   border: none;
@@ -222,13 +227,16 @@
 }
 
 .background {
+  width: 1366px;
   min-height: 100vh;
-  background-color: #212121;
+  background-color: rgb(119, 111, 111);
   color: white;
-  padding: 20px;
+  
 }
 
 .top-bar {
+  background-color: #212121;
+  padding: 20px ;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -264,6 +272,7 @@
 }
 
 .container {
+  color: black;
   text-align: center;
   margin-top: 30px;
 }
@@ -277,7 +286,9 @@
 }
 
 .card {
-  background: #2a2a2a;
+  border: 2px solid black;
+  background: white;
+  color: black;
   padding: 20px;
   border-radius: 12px;
   width: 280px;
@@ -285,7 +296,7 @@
 }
 
 .expiracao {
-  color: #aaa;
+  color: #2b2a2a;
   font-size: 0.9rem;
 }
 

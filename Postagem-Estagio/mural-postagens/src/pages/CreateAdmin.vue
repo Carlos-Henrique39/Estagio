@@ -83,7 +83,7 @@ export default {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background: #585151;
+  background-color: rgb(119, 111, 111);
 }
 
 .form-group {

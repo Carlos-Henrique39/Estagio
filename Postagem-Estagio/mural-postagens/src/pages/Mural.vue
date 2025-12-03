@@ -461,7 +461,7 @@ export default {
 .btn-layout {
   margin-left: 10px;
   background: #2c3e50;
-  color: white;
+  color: black;
   padding: 12px 15px; 
   border-radius: 6px;
   border: none;
@@ -669,7 +669,7 @@ export default {
   display: inline-block;
   padding: 10px 15px;
   background-color: #3498db;
-  color: white;
+  color: black;
   border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
@@ -703,12 +703,12 @@ export default {
 
 .btn-edit {
   background-color: #3498db;
-  color: white;
+  color: black;
 }
 
 .btn-delete {
   background-color: #e74c3c;
-  color: white;
+  color: black;
 }
 
 .btn-edit:hover { background-color: #2980b9; }
@@ -743,17 +743,30 @@ export default {
 }
 
 .direita {
+  max-width: 1700px;
+  background-color: #212121;
+  padding: 22.5px;
   display: flex;
   justify-content: flex-end;
-  margin: 20px 40px 0 0;
+
 }
 
-.btn-login,
-.btn-create {
+.btn-login{
   display: inline-block;
   padding: 10px 15px;
   background-color: #42b983;
   color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-create {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #42b983;
+  color: black;
   border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
@@ -768,16 +781,16 @@ export default {
 .background {
   min-height: 100vh;
   width: 100%;
-  background-color: #212121;
+  background-color: rgb(119, 111, 111);
   overflow: auto;
-  padding-bottom: 60px;
 }
 
 .mural-container {
-  max-width: 1000px;
+  background-color: rgb(119, 111, 111);
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
-  color: #fff;
+  padding: 40px;
+  color: black;
   text-align: center;
 }
 
@@ -802,8 +815,9 @@ export default {
 }
 
 .post-card {
-  background: #2a2a2a;
-  color: #fff;
+  border: 2px solid black;
+  background: white;
+  color: black;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
@@ -815,13 +829,13 @@ export default {
 
 .post-card h2 {
   margin-bottom: 15px;
-  color: #42b983;
+  color: black;
 }
 
 .descricao {
   margin-bottom: 15px;
   font-size: 1rem;
-  color: #ddd;
+  color: black;
   line-height: 1.5;
 }
 
@@ -833,7 +847,7 @@ export default {
 
 .expira-em {
   font-size: 0.85rem;
-  color: #aaa;
+  color: #2b2a2a;
 }
 
 .arrow {
@@ -858,10 +872,10 @@ export default {
   cursor: not-allowed;
 }
 .arrow.left {
-  left: -150px;
+  left: -30px;
 }
 .arrow.right {
-  right: -150px;
+  right: -30px;
 }
 
 .fade-enter-active, 

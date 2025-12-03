@@ -49,7 +49,7 @@
           <button type="button" class="button2" @click="removeLink(index)">✕</button>
         </div>
 
-        <button type="button" class="button1" @click="addLink">+ Adicionar link</button>
+        <button type="button" class="button3" @click="addLink">+ Adicionar link</button>
       </div>
 
       <div class="form-group">
@@ -236,7 +236,7 @@ export default {
 }
 
 .background{
-  background-color: #212121;
+  background-color: rgb(119, 111, 111);
 }
 
 .create-post-container {
@@ -294,7 +294,7 @@ input[type="time"]{
 }
 
 .button1 {
-  justify-content: center;
+  justify-content: left;
   margin-left: 10px;
   width: 975px;
   padding: 10px;
@@ -322,6 +322,22 @@ input[type="time"]{
   cursor: pointer;
 }
 
+.button3 {
+  justify-content: left;
+  margin-left: 10px;
+  width: 200px;
+  padding: 10px;
+  background-color: #42b983;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button3:hover {
+  background-color: #369870;
+}
 
 .success-message {
   margin-top: 15px;

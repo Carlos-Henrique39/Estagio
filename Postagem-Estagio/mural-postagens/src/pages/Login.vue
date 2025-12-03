@@ -94,7 +94,7 @@ export default {
 
 <style scoped>
 .background {
-  background-color: #1c1c1c;
+  background-color: rgb(119, 111, 111);
   min-height: 100vh;
   display: flex;
   justify-content: center;

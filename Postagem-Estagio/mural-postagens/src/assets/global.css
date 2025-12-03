@@ -8,7 +8,7 @@ html, body {
 
 /* opcional: garantir cor padrão */
 body {
-  background-color: #212121;
+  background-color: gray;
   color: #fff;
   font-family: sans-serif;
 }
