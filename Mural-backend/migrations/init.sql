@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS expired_posts (
   title VARCHAR(255),
   description TEXT,
   author_id INTEGER,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
   expired_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
