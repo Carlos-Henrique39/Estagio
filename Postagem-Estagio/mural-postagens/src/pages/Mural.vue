@@ -81,7 +81,7 @@
         <button
           class="arrow right"
           @click="nextGroup"
-          :disabled="currentIndex + 3 >= posts.length"
+          :disabled="currentIndex + 4 >= posts.length"
         >
           ▶
         </button>
@@ -308,14 +308,14 @@ export default {
     },
 
     nextGroup() {
-      if (this.currentIndex + 3 < this.posts.length) {
-        this.currentIndex += 3;
+      if (this.currentIndex + 4 < this.posts.length) {
+        this.currentIndex += 4;
       }
     },
 
     prevGroup() {
       if (this.currentIndex > 0) {
-        this.currentIndex -= 3;
+        this.currentIndex -= 4;
       }
     },
 
@@ -502,8 +502,9 @@ export default {
 }
 
 .grid-card {
-  background: #2a2a2a;
-  color: #fff;
+  border: 2px solid black;
+  background: white;
+  color: black;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
@@ -528,13 +529,14 @@ export default {
 }
 
 .list-item {
+  border: 2px solid black;
   display: flex;
   padding: 16px;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.15);
   gap: 16px;
-  background: #2a2a2a;
-  color: #fff;
+  background: white;
+  color: black;
   transition: transform 0.3s ease, opacity 0.3s ease;
   text-align: left;
 }
@@ -786,12 +788,17 @@ export default {
 }
 
 .mural-container {
-  background-color: rgb(119, 111, 111);
-  max-width: 1400px;
+  min-height: 100vh;
+  min-width: 1200px;
   margin: 0 auto;
-  padding: 40px;
-  color: black;
+  color: #42b983;
   text-align: center;
+  padding: 20px;
+  background-image: url('src/assets/fatec.jpg');
+  background-size: cover;        
+  background-position: center;   
+  background-repeat: no-repeat;
+  position: relative;
 }
 
 .actions {
@@ -872,10 +879,10 @@ export default {
   cursor: not-allowed;
 }
 .arrow.left {
-  left: -30px;
+  left: 0px;
 }
 .arrow.right {
-  right: -30px;
+  right: 0px;
 }
 
 .fade-enter-active, 

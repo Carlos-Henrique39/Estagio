@@ -41,6 +41,7 @@
               </li>
             </ul>
           </div>
+          <p class="expiracao">Data de criação: {{ formatDate(post.created_at) }}</p>
           <p class="expiracao">Expirou em: {{ formatDate(post.expires_at) }}</p>
         </div>
       </div>
@@ -85,12 +86,13 @@
 
     downloadCSV() {
       const rows = [
-        ["Título", "Descrição", "Imagem", "Links", "Arquivos", "Expirou em"],
+        ["Título", "Descrição", "Imagem", "Links", "Arquivos", "Criado em", "Expirou em"],
         ...this.expiredPosts.map(p => [
           p.title,
           p.description,
           p.links?.join(" | ") || "",
           p.files?.map(f => f.name).join(" | ") || "",
+          this.formatDate(p.created_at),
           this.formatDate(p.expires_at)
         ])
       ];
@@ -130,6 +132,10 @@
 
     closeImageModal() {
       this.showImageModal = false;
+    },
+
+    formatDate(date) {
+      return new Date(date).toLocaleString('pt-BR');
     },
 
     formatDate(dateString) {

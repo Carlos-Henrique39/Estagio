@@ -117,6 +117,7 @@ router.get('/expired', authenticate, requireAdmin, async (req, res) => {
         image,
         links,
         files,
+        created_at,
         expires_at
       FROM posts 
       WHERE expires_at <= NOW() 
@@ -133,7 +134,7 @@ router.get('/expired', authenticate, requireAdmin, async (req, res) => {
 router.get("/expired/export/pdf", authenticate, requireAdmin, async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT id, title, description, image, links, files, expires_at
+      SELECT id, title, description, image, links, files, created_at, expires_at
       FROM posts
       WHERE expires_at <= NOW()
       ORDER BY expires_at DESC
@@ -154,6 +155,7 @@ router.get("/expired/export/pdf", authenticate, requireAdmin, async (req, res) =
 
       doc.fontSize(12).text(`Descrição: ${p.description}`);
       
+      doc.fontSize(12).text(`Criado em: ${new Date(p.created_at).toLocaleString('pt-BR')}`);
       doc.text(`Expirou em: ${p.expires_at}`);
 
       if (p.links?.length) doc.text(`Links: ${p.links.join(", ")}`);
